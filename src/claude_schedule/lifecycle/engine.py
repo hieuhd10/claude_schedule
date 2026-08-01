@@ -29,7 +29,7 @@ def _find_latest(comments: list[Comment], predicate) -> Comment | None:
 
 def _checks_green(checks: list[CheckRun]) -> bool:
     if not checks:
-        return True
+        return False
     return all(check.conclusion == "success" for check in checks)
 
 

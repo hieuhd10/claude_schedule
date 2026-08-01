@@ -197,6 +197,22 @@ def test_ready_to_merge_stage():
     assert result.stage == Stage.READY_TO_MERGE
 
 
+def test_test_passed_with_no_checks_configured_does_not_reach_ready_to_merge():
+    result = infer_stage(
+        issue=_issue(),
+        issue_comments=[],
+        linked_pull_request=_pull_request(),
+        pr_comments=[
+            _comment(5, "REVIEW PASSED", CLAUDE_LOGIN, 5),
+            _comment(6, "TEST PASSED", CLAUDE_LOGIN, 6),
+        ],
+        checks=[],
+        claude_bot_login=CLAUDE_LOGIN,
+    )
+    assert result.stage != Stage.READY_TO_MERGE
+    assert result.stage == Stage.TEST
+
+
 def test_completed_stage():
     result = infer_stage(
         issue=_issue(state=IssueState.CLOSED),
