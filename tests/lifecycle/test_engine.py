@@ -210,3 +210,19 @@ def test_completed_stage():
         claude_bot_login=CLAUDE_LOGIN,
     )
     assert result.stage == Stage.COMPLETED
+
+
+def test_completed_stage_when_issue_closed_without_pull_request():
+    result = infer_stage(
+        issue=_issue(state=IssueState.CLOSED),
+        issue_comments=[
+            _comment(1, "@claude debug this", "hieuhd10", 1),
+            _comment(2, "Root Cause:\nnot a real bug", CLAUDE_LOGIN, 2),
+        ],
+        linked_pull_request=None,
+        pr_comments=[],
+        checks=[],
+        claude_bot_login=CLAUDE_LOGIN,
+    )
+    assert result.stage == Stage.COMPLETED
+    assert "not a bug" in result.reasoning[0]

@@ -60,14 +60,19 @@ def infer_stage(
     review_findings: list[str] = []
     test_result: str | None = None
 
-    if issue.state == IssueState.CLOSED and linked_pull_request and linked_pull_request.merged:
-        reasoning.append("Issue is closed and the linked Pull Request is merged.")
+    if issue.state == IssueState.CLOSED:
+        if linked_pull_request and linked_pull_request.merged:
+            reasoning.append("Issue is closed and the linked Pull Request is merged.")
+        elif linked_pull_request:
+            reasoning.append("Issue is closed without the linked Pull Request being merged.")
+        else:
+            reasoning.append("Issue is closed without a linked Pull Request (e.g. closed as not a bug).")
         return LifecycleResult(
             stage=Stage.COMPLETED,
             reasoning=reasoning,
             last_command=last_command,
             last_claude_response=last_claude_response,
-            next_recommended_action="No action needed - lifecycle complete.",
+            next_recommended_action="No action needed - issue is closed.",
             review_findings=review_findings,
             test_result=test_result,
         )
