@@ -228,6 +228,93 @@ def test_completed_stage():
     assert result.stage == Stage.COMPLETED
 
 
+def test_quoted_test_passed_inside_review_comment_does_not_trigger_ready_to_merge():
+    result = infer_stage(
+        issue=_issue(),
+        issue_comments=[],
+        linked_pull_request=_pull_request(),
+        pr_comments=[
+            _comment(
+                4,
+                "@claude review this PR",
+                "hieuhd10",
+                4,
+            ),
+            _comment(
+                5,
+                "REVIEW PASSED\n\n"
+                "Note: the earlier regression printed `TEST PASSED` even though no "
+                "test had run - this PR fixes that.",
+                CLAUDE_LOGIN,
+                5,
+            ),
+        ],
+        checks=[
+            CheckRun(
+                name="claude-review",
+                status="completed",
+                conclusion="success",
+                html_url=None,
+                started_at=_dt(5),
+                completed_at=_dt(5),
+            )
+        ],
+        claude_bot_login=CLAUDE_LOGIN,
+    )
+    assert result.stage == Stage.TEST
+    assert result.test_result is None
+
+
+def test_unrelated_green_check_does_not_count_as_ci_verification():
+    result = infer_stage(
+        issue=_issue(),
+        issue_comments=[],
+        linked_pull_request=_pull_request(),
+        pr_comments=[
+            _comment(5, "REVIEW PASSED", CLAUDE_LOGIN, 5),
+            _comment(6, "TEST PASSED", CLAUDE_LOGIN, 6),
+        ],
+        checks=[
+            CheckRun(
+                name="claude-review",
+                status="completed",
+                conclusion="success",
+                html_url=None,
+                started_at=_dt(6),
+                completed_at=_dt(6),
+            )
+        ],
+        claude_bot_login=CLAUDE_LOGIN,
+    )
+    assert result.stage == Stage.TEST
+    assert result.test_result is None
+
+
+def test_configured_test_check_name_reaches_ready_to_merge():
+    result = infer_stage(
+        issue=_issue(),
+        issue_comments=[],
+        linked_pull_request=_pull_request(),
+        pr_comments=[
+            _comment(5, "REVIEW PASSED", CLAUDE_LOGIN, 5),
+            _comment(6, "TEST PASSED", CLAUDE_LOGIN, 6),
+        ],
+        checks=[
+            CheckRun(
+                name="integration-tests",
+                status="completed",
+                conclusion="success",
+                html_url=None,
+                started_at=_dt(6),
+                completed_at=_dt(7),
+            )
+        ],
+        claude_bot_login=CLAUDE_LOGIN,
+        test_check_names=["integration-tests"],
+    )
+    assert result.stage == Stage.READY_TO_MERGE
+
+
 def test_completed_stage_when_issue_closed_without_pull_request():
     result = infer_stage(
         issue=_issue(state=IssueState.CLOSED),

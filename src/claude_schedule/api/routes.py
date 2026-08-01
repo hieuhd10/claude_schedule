@@ -76,6 +76,7 @@ async def get_issue_detail(
         pr_comments=pr_comments,
         checks=pr_checks,
         claude_bot_login=settings.claude_bot_login,
+        test_check_names=settings.test_check_name_list,
     )
     activity = merge_and_categorize(
         issue_number=issue_number,

@@ -4,12 +4,25 @@ from claude_schedule.github.models import CheckRun, Comment, Issue, IssueState, 
 from claude_schedule.lifecycle.models import LifecycleResult, ParsedClaudeResponse, Stage
 from claude_schedule.lifecycle.timeline import parse_claude_response
 
-_REVIEW_PASSED_RE = re.compile(r"\bREVIEW PASSED\b", re.IGNORECASE)
-_REVIEW_FAILED_RE = re.compile(r"\bREVIEW FAILED\b", re.IGNORECASE)
-_TEST_PASSED_RE = re.compile(r"\bTEST PASSED\b", re.IGNORECASE)
-_TEST_FAILED_RE = re.compile(r"\bTEST FAILED\b", re.IGNORECASE)
+
+def _line_marker(phrase: str) -> re.Pattern:
+    # Marker must occupy its own line (optionally wrapped in markdown emphasis/
+    # heading/code decoration) so quoting the phrase inside prose or a code
+    # span elsewhere in the comment can't be mistaken for a real verdict.
+    return re.compile(rf"^[\s*_#`]*{phrase}[\s*_#`]*$", re.IGNORECASE | re.MULTILINE)
+
+
+_REVIEW_PASSED_RE = _line_marker("REVIEW PASSED")
+_REVIEW_FAILED_RE = _line_marker("REVIEW FAILED")
+_TEST_PASSED_RE = _line_marker("TEST PASSED")
+_TEST_FAILED_RE = _line_marker("TEST FAILED")
 _DEBUG_APPROVED_RE = re.compile(r"\[LIFECYCLE:DEBUG_APPROVED\]", re.IGNORECASE)
 _HUMAN_COMMAND_RE = re.compile(r"^\s*@claude\b", re.IGNORECASE)
+
+# Checks produced by Claude's own automation (e.g. the review workflow) verify
+# review/response quality, not that the test suite ran - they must never be
+# mistaken for CI test verification.
+_NON_TEST_CHECK_NAME_MARKERS = ("claude",)
 
 
 def _latest_match(comments: list[Comment], patterns: dict[str, re.Pattern]) -> str | None:
@@ -27,10 +40,22 @@ def _find_latest(comments: list[Comment], predicate) -> Comment | None:
     return None
 
 
-def _checks_green(checks: list[CheckRun]) -> bool:
-    if not checks:
+def _relevant_checks(checks: list[CheckRun], test_check_names: list[str] | None) -> list[CheckRun]:
+    if test_check_names:
+        allowed = {name.lower() for name in test_check_names}
+        return [check for check in checks if check.name.lower() in allowed]
+    return [
+        check
+        for check in checks
+        if not any(marker in check.name.lower() for marker in _NON_TEST_CHECK_NAME_MARKERS)
+    ]
+
+
+def _checks_green(checks: list[CheckRun], test_check_names: list[str] | None = None) -> bool:
+    relevant = _relevant_checks(checks, test_check_names)
+    if not relevant:
         return False
-    return all(check.conclusion == "success" for check in checks)
+    return all(check.conclusion == "success" for check in relevant)
 
 
 def infer_stage(
@@ -41,6 +66,7 @@ def infer_stage(
     pr_comments: list[Comment],
     checks: list[CheckRun],
     claude_bot_login: str,
+    test_check_names: list[str] | None = None,
 ) -> LifecycleResult:
     all_comments = sorted(issue_comments + pr_comments, key=lambda c: c.created_at)
 
@@ -78,7 +104,7 @@ def infer_stage(
         )
 
     if linked_pull_request is not None and linked_pull_request.state == IssueState.OPEN:
-        if test_marker == "PASSED" and _checks_green(checks):
+        if test_marker == "PASSED" and _checks_green(checks, test_check_names):
             reasoning.append("Test comment reports TEST PASSED and checks are green.")
             return LifecycleResult(
                 stage=Stage.READY_TO_MERGE,
