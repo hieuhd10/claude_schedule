@@ -153,7 +153,7 @@ class GitHubService:
         return _map_issue(raw)
 
     async def get_issue_comments(self, owner: str, repository: str, issue_number: int) -> list[Comment]:
-        raw = await self._client.get(
+        raw = await self._client.get_paginated(
             f"/repos/{owner}/{repository}/issues/{issue_number}/comments",
             not_found_error=IssueNotFoundError,
         )
@@ -162,7 +162,7 @@ class GitHubService:
     async def get_issue_timeline(
         self, owner: str, repository: str, issue_number: int
     ) -> list[TimelineEvent]:
-        raw = await self._client.get(
+        raw = await self._client.get_paginated(
             f"/repos/{owner}/{repository}/issues/{issue_number}/timeline",
             not_found_error=IssueNotFoundError,
             headers=_TIMELINE_ACCEPT_HEADER,
@@ -170,9 +170,14 @@ class GitHubService:
         return [_map_timeline_event(item) for item in raw]
 
     async def find_linked_pull_request(
-        self, owner: str, repository: str, issue_number: int
+        self,
+        owner: str,
+        repository: str,
+        issue_number: int,
+        timeline: list[TimelineEvent] | None = None,
     ) -> PullRequest | None:
-        timeline = await self.get_issue_timeline(owner, repository, issue_number)
+        if timeline is None:
+            timeline = await self.get_issue_timeline(owner, repository, issue_number)
 
         candidates: list[tuple[datetime, int]] = []
         for event in timeline:
@@ -202,7 +207,7 @@ class GitHubService:
     async def get_pull_request_comments(
         self, owner: str, repository: str, pr_number: int
     ) -> list[Comment]:
-        raw = await self._client.get(
+        raw = await self._client.get_paginated(
             f"/repos/{owner}/{repository}/issues/{pr_number}/comments",
             not_found_error=PullRequestNotFoundError,
         )
@@ -211,21 +216,28 @@ class GitHubService:
     async def get_pull_request_commits(
         self, owner: str, repository: str, pr_number: int
     ) -> list[Commit]:
-        raw = await self._client.get(
+        raw = await self._client.get_paginated(
             f"/repos/{owner}/{repository}/pulls/{pr_number}/commits",
             not_found_error=PullRequestNotFoundError,
         )
         return [_map_commit(item) for item in raw]
 
     async def get_pull_request_checks(
-        self, owner: str, repository: str, pr_number: int
+        self,
+        owner: str,
+        repository: str,
+        pr_number: int,
+        head_sha: str | None = None,
     ) -> list[CheckRun]:
-        pull_request = await self.get_pull_request(owner, repository, pr_number)
-        raw = await self._client.get(
-            f"/repos/{owner}/{repository}/commits/{pull_request.head_sha}/check-runs",
+        if head_sha is None:
+            pull_request = await self.get_pull_request(owner, repository, pr_number)
+            head_sha = pull_request.head_sha
+        raw = await self._client.get_paginated(
+            f"/repos/{owner}/{repository}/commits/{head_sha}/check-runs",
+            list_key="check_runs",
             not_found_error=PullRequestNotFoundError,
         )
-        return [_map_check_run(item) for item in raw.get("check_runs", [])]
+        return [_map_check_run(item) for item in raw]
 
     async def post_issue_comment(
         self, owner: str, repository: str, issue_number: int, body: str

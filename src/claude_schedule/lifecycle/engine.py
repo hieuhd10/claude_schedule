@@ -4,16 +4,27 @@ from claude_schedule.github.models import CheckRun, Comment, Issue, IssueState, 
 from claude_schedule.lifecycle.models import LifecycleResult, ParsedClaudeResponse, Stage
 from claude_schedule.lifecycle.timeline import parse_claude_response
 
-_REVIEW_PASSED_RE = re.compile(r"\bREVIEW PASSED\b", re.IGNORECASE)
-_REVIEW_FAILED_RE = re.compile(r"\bREVIEW FAILED\b", re.IGNORECASE)
-_TEST_PASSED_RE = re.compile(r"\bTEST PASSED\b", re.IGNORECASE)
-_TEST_FAILED_RE = re.compile(r"\bTEST FAILED\b", re.IGNORECASE)
+_REVIEW_PASSED_RE = re.compile(r"^\s*REVIEW PASSED\s*$", re.IGNORECASE | re.MULTILINE)
+_REVIEW_FAILED_RE = re.compile(r"^\s*REVIEW FAILED\s*$", re.IGNORECASE | re.MULTILINE)
+_TEST_PASSED_RE = re.compile(r"^\s*TEST PASSED\s*$", re.IGNORECASE | re.MULTILINE)
+_TEST_FAILED_RE = re.compile(r"^\s*TEST FAILED\s*$", re.IGNORECASE | re.MULTILINE)
 _DEBUG_APPROVED_RE = re.compile(r"\[LIFECYCLE:DEBUG_APPROVED\]", re.IGNORECASE)
 _HUMAN_COMMAND_RE = re.compile(r"^\s*@claude\b", re.IGNORECASE)
+_REVIEW_COMMAND_RE = re.compile(r"\breview\b", re.IGNORECASE)
+_TEST_COMMAND_RE = re.compile(r"\b(?:test|tests|testing|ci)\b", re.IGNORECASE)
 
 
-def _latest_match(comments: list[Comment], patterns: dict[str, re.Pattern]) -> str | None:
-    for comment in reversed(comments):
+def _latest_match(
+    comments: list[Comment],
+    patterns: dict[str, re.Pattern],
+    command_pattern: re.Pattern,
+) -> str | None:
+    for comment in sorted(comments, key=lambda item: item.created_at, reverse=True):
+        if _HUMAN_COMMAND_RE.match(comment.body):
+            # A newer command starts a fresh attempt and invalidates the previous result.
+            if command_pattern.search(comment.body):
+                return None
+            continue
         for label, pattern in patterns.items():
             if pattern.search(comment.body):
                 return label
@@ -30,7 +41,7 @@ def _find_latest(comments: list[Comment], predicate) -> Comment | None:
 def _checks_green(checks: list[CheckRun]) -> bool:
     if not checks:
         return False
-    return all(check.conclusion == "success" for check in checks)
+    return all(check.conclusion in {"success", "neutral", "skipped"} for check in checks)
 
 
 def infer_stage(
@@ -53,8 +64,16 @@ def infer_stage(
     )
 
     debug_approved = any(_DEBUG_APPROVED_RE.search(c.body) for c in issue_comments)
-    review_marker = _latest_match(pr_comments, {"PASSED": _REVIEW_PASSED_RE, "FAILED": _REVIEW_FAILED_RE})
-    test_marker = _latest_match(pr_comments, {"PASSED": _TEST_PASSED_RE, "FAILED": _TEST_FAILED_RE})
+    review_marker = _latest_match(
+        pr_comments,
+        {"PASSED": _REVIEW_PASSED_RE, "FAILED": _REVIEW_FAILED_RE},
+        _REVIEW_COMMAND_RE,
+    )
+    test_marker = _latest_match(
+        pr_comments,
+        {"PASSED": _TEST_PASSED_RE, "FAILED": _TEST_FAILED_RE},
+        _TEST_COMMAND_RE,
+    )
 
     reasoning: list[str] = []
     review_findings: list[str] = []
