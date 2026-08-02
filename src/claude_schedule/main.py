@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -6,7 +8,15 @@ from claude_schedule.settings import get_settings
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title="Claude Schedule - GitHub Issue Lifecycle Demo")
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        yield
+        from claude_schedule.api.deps import close_github_client
+
+        await close_github_client(settings)
+
+    app = FastAPI(title="Claude Schedule - GitHub Issue Lifecycle Demo", lifespan=lifespan)
 
     app.add_middleware(
         CORSMiddleware,

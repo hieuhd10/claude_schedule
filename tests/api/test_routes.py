@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from claude_schedule.api.deps import get_github_service
 from claude_schedule.github.models import Comment, Issue, IssueState
 from claude_schedule.main import app
+from claude_schedule.settings import Settings, get_settings
 
 
 def _dt() -> datetime:
@@ -55,7 +56,7 @@ class FakeGitHubService:
     async def get_issue_timeline(self, owner, repository, issue_number):
         return []
 
-    async def find_linked_pull_request(self, owner, repository, issue_number):
+    async def find_linked_pull_request(self, owner, repository, issue_number, timeline=None):
         return self.linked_pull_request
 
     async def get_pull_request_comments(self, owner, repository, pr_number):
@@ -64,7 +65,7 @@ class FakeGitHubService:
     async def get_pull_request_commits(self, owner, repository, pr_number):
         return []
 
-    async def get_pull_request_checks(self, owner, repository, pr_number):
+    async def get_pull_request_checks(self, owner, repository, pr_number, head_sha=None):
         return []
 
     async def post_issue_comment(self, owner, repository, issue_number, body):
@@ -115,6 +116,29 @@ def test_get_issue_detail_no_pr(client):
     assert body["issue"]["number"] == 128
     assert body["linked_pull_request"] is None
     assert body["lifecycle"]["stage"] == "debug"
+
+
+def test_repository_guard_rejects_mismatched_repository(client):
+    settings = Settings(github_owner="hieuhd10", github_repository="claude_schedule")
+    app.dependency_overrides[get_settings] = lambda: settings
+    try:
+        response = client.get("/api/issues/another-owner/another-repository/128")
+    finally:
+        app.dependency_overrides.pop(get_settings, None)
+
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "REPOSITORY_NOT_ALLOWED"
+
+
+def test_repository_guard_allows_configured_repository_case_insensitively(client):
+    settings = Settings(github_owner="HieuHD10", github_repository="Claude_Schedule")
+    app.dependency_overrides[get_settings] = lambda: settings
+    try:
+        response = client.get("/api/issues/hieuhd10/claude_schedule/128")
+    finally:
+        app.dependency_overrides.pop(get_settings, None)
+
+    assert response.status_code == 200
 
 
 def test_post_issue_comment(client, fake_service):
@@ -186,3 +210,19 @@ def test_create_issue(client, fake_service):
     assert labels == ["env:dev", "base:develop", "severity:high"]
     assert assignee == "hieuhd10"
     assert "## Steps to Reproduce" in body
+
+
+def test_create_issue_validation_error_uses_api_error_shape(client):
+    response = client.post(
+        "/api/issues/hieuhd10/claude_schedule",
+        json={
+            "title": "Bug",
+            "environment": "x" * 47,
+            "steps_to_reproduce": "steps",
+            "expected_result": "expected",
+            "actual_result": "actual",
+        },
+    )
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "VALIDATION_ERROR"
+    assert "at most 46 characters" in response.json()["error"]["message"]

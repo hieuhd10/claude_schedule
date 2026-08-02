@@ -10,6 +10,10 @@ interface IssueHeaderProps {
   refreshing: boolean;
 }
 
+function initials(name: string): string {
+  return name.slice(0, 2).toUpperCase();
+}
+
 export function IssueHeader({
   owner,
   repository,
@@ -47,13 +51,37 @@ export function IssueHeader({
             {label}
           </span>
         ))}
+        {linkedPullRequest && (
+          <a
+            className={`badge badge--link badge--${linkedPullRequest.merged ? "closed" : linkedPullRequest.state}`}
+            href={linkedPullRequest.html_url}
+            target="_blank"
+            rel="noreferrer"
+          >
+            PR #{linkedPullRequest.number}
+          </a>
+        )}
       </div>
 
       <div className="issue-header__people">
-        <span>Author: {issue.author}</span>
-        <span>Assignee: {issue.assignee ?? "unassigned"}</span>
-        <span>Created: {new Date(issue.created_at).toLocaleString()}</span>
-        <span>Updated: {new Date(issue.updated_at).toLocaleString()}</span>
+        <span className="person-chip">
+          <span className="person-chip__avatar">{initials(issue.author)}</span>
+          <span className="person-chip__label">
+            Author <strong>{issue.author}</strong>
+          </span>
+        </span>
+        <span className="person-chip">
+          <span className="person-chip__avatar">{initials(issue.assignee ?? "—")}</span>
+          <span className="person-chip__label">
+            Assignee <strong>{issue.assignee ?? "unassigned"}</strong>
+          </span>
+        </span>
+        <span className="issue-header__timestamp">
+          Created: {new Date(issue.created_at).toLocaleString()}
+        </span>
+        <span className="issue-header__timestamp">
+          Updated: {new Date(issue.updated_at).toLocaleString()}
+        </span>
       </div>
 
       <a href={issue.html_url} target="_blank" rel="noreferrer">

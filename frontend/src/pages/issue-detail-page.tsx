@@ -46,14 +46,17 @@ export function IssueDetailPage({ owner, repository, issueNumber }: IssueDetailP
         pollAttempts={pollAttempts}
       />
 
-      <LifecycleStepper currentStage={data.lifecycle.stage} />
+      <section className="completion-flow">
+        <h2 className="completion-flow__title">Completion Flow</h2>
+        <LifecycleStepper currentStage={data.lifecycle.stage} />
 
-      {!data.linked_pull_request && (
-        <p className="issue-detail-page__no-pr-note">
-          No Pull Request linked yet. Claude needs to complete the Fix step and open a Pull
-          Request before Review and Test actions become available.
-        </p>
-      )}
+        {!data.linked_pull_request && (
+          <p className="issue-detail-page__no-pr-note">
+            No Pull Request linked yet. Claude needs to complete the Fix step and open a Pull
+            Request before Review and Test actions become available.
+          </p>
+        )}
+      </section>
 
       <div className="issue-detail-page__columns">
         <div className="issue-detail-page__main">
@@ -69,6 +72,7 @@ export function IssueDetailPage({ owner, repository, issueNumber }: IssueDetailP
             repository={repository}
             issueNumber={issueNumber}
             linkedPullRequest={data.linked_pull_request}
+            currentStage={data.lifecycle.stage}
             onPosted={(_comment, startedClaudeCommand) => {
               void refresh();
               if (startedClaudeCommand) startWaitingForClaude();
@@ -79,7 +83,7 @@ export function IssueDetailPage({ owner, repository, issueNumber }: IssueDetailP
             owner={owner}
             repository={repository}
             issueNumber={issueNumber}
-            linkedPullRequest={data.linked_pull_request}
+            currentStage={data.lifecycle.stage}
             onPosted={() => void refresh()}
           />
         </div>

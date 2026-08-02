@@ -6,6 +6,10 @@ class RepoNotFoundError(GitHubError):
     pass
 
 
+class RepositoryNotAllowedError(GitHubError):
+    pass
+
+
 class IssueNotFoundError(GitHubError):
     pass
 

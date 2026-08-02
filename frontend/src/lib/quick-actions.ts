@@ -1,58 +1,64 @@
+import type { Stage } from "../api/types";
+
 export type QuickActionTarget = "issue" | "pull_request";
 
-export interface QuickAction {
-  key: string;
-  label: string;
+export interface StageAction {
+  title: string;
+  description: string;
   target: QuickActionTarget;
-  buildPrompt: () => string;
+  manualPlaceholder: string;
+  claudePrompt: string;
 }
 
-export const QUICK_ACTIONS: QuickAction[] = [
-  {
-    key: "debug-issue",
-    label: "Debug issue",
+export const STAGE_ACTIONS: Record<Stage, StageAction> = {
+  debug: {
+    title: "Investigate the issue",
+    description: "Add your own investigation, or ask Claude to inspect the issue and report the root cause.",
     target: "issue",
-    buildPrompt: () =>
-      "@claude Please debug this issue: investigate the root cause and report back your findings.",
+    manualPlaceholder: "Add investigation notes, reproduction details, or the suspected root cause…",
+    claudePrompt:
+      "@claude Please investigate this issue, identify the root cause, and report your findings with evidence.",
   },
-  {
-    key: "accept-debug-start-fix",
-    label: "Accept debug and start fix",
+  fix: {
+    title: "Implement the fix",
+    description: "Track implementation manually, or ask Claude to make the change and open a Pull Request.",
     target: "issue",
-    buildPrompt: () =>
-      "@claude The debug analysis looks correct. Please proceed to fix the issue and open a Pull Request.",
+    manualPlaceholder: "Add implementation progress, decisions, or a link to the work in progress…",
+    claudePrompt:
+      "@claude The debug analysis is approved. Please implement the fix, add appropriate tests, and open a Pull Request linked to this issue.",
   },
-  {
-    key: "review-pull-request",
-    label: "Review Pull Request",
+  review: {
+    title: "Review the Pull Request",
+    description: "Post review findings yourself, or ask Claude to review the linked Pull Request.",
     target: "pull_request",
-    buildPrompt: () =>
-      "@claude Please review this Pull Request and report REVIEW PASSED or REVIEW FAILED with findings.",
+    manualPlaceholder:
+      "Add review findings. Put REVIEW PASSED or REVIEW FAILED on its own line to update the lifecycle…",
+    claudePrompt:
+      "@claude Please review this Pull Request for correctness, regressions, and test coverage. Report the final result on its own line as REVIEW PASSED or REVIEW FAILED, followed by any findings.",
   },
-  {
-    key: "fix-review-findings",
-    label: "Fix review findings",
+  test: {
+    title: "Verify the fix",
+    description: "Record test evidence manually, or ask Claude to run and assess the relevant tests.",
     target: "pull_request",
-    buildPrompt: () => "@claude Please fix the review findings reported above.",
+    manualPlaceholder:
+      "Add test evidence. Put TEST PASSED or TEST FAILED on its own line to update the lifecycle…",
+    claudePrompt:
+      "@claude Please run the relevant tests for this Pull Request and inspect the CI results. Report the final result on its own line as TEST PASSED or TEST FAILED, followed by evidence.",
   },
-  {
-    key: "run-tests",
-    label: "Run tests",
+  ready_to_merge: {
+    title: "Prepare to complete",
+    description: "Record the merge decision manually, or ask Claude for a final readiness check.",
     target: "pull_request",
-    buildPrompt: () =>
-      "@claude Please run the tests for this Pull Request and report TEST PASSED or TEST FAILED.",
+    manualPlaceholder: "Add the merge decision, rollout notes, or any final verification…",
+    claudePrompt:
+      "@claude Please perform a final merge-readiness check and summarize any remaining risks. Do not merge; report whether the Pull Request is ready.",
   },
-  {
-    key: "fix-test-failure",
-    label: "Fix test failure",
-    target: "pull_request",
-    buildPrompt: () => "@claude Please fix the failing test(s) reported above.",
+  completed: {
+    title: "Document the outcome",
+    description: "Leave a closing note manually, or ask Claude to summarize the completed work.",
+    target: "issue",
+    manualPlaceholder: "Add a closing summary, deployment note, or follow-up item…",
+    claudePrompt:
+      "@claude Please summarize the final resolution, tests performed, and any follow-up work for this completed issue.",
   },
-  {
-    key: "prepare-for-merge",
-    label: "Prepare for merge",
-    target: "pull_request",
-    buildPrompt: () =>
-      "@claude Please confirm this Pull Request is ready to merge (all checks green, tests passing).",
-  },
-];
+};

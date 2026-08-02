@@ -28,6 +28,26 @@ async def test_get_success(client):
 
 
 @respx.mock
+async def test_get_paginated_follows_next_link(client):
+    page_two_url = "https://api.github.com/repos/o/r/issues/1/comments?page=2"
+    route = respx.get("https://api.github.com/repos/o/r/issues/1/comments").mock(
+        side_effect=[
+            httpx.Response(
+            200,
+            json=[{"id": 1}],
+            headers={"Link": f'<{page_two_url}>; rel="next"'},
+            ),
+            httpx.Response(200, json=[{"id": 2}]),
+        ]
+    )
+
+    result = await client.get_paginated("/repos/o/r/issues/1/comments")
+
+    assert [item["id"] for item in result] == [1, 2]
+    assert route.call_count == 2
+
+
+@respx.mock
 async def test_get_401_raises_token_invalid(client):
     respx.get("https://api.github.com/repos/o/r").mock(return_value=httpx.Response(401))
     with pytest.raises(TokenInvalidError):

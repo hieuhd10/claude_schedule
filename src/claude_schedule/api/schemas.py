@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ValidationInfo, field_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
 from claude_schedule.github.models import CheckRun, Comment, Commit, Issue, PullRequest
 from claude_schedule.lifecycle.models import ActivityItem, Checkpoint, LifecycleResult
@@ -15,7 +15,7 @@ LABEL_PREFIXES = {
 
 
 class ParseUrlRequest(BaseModel):
-    url: str
+    url: str = Field(min_length=1)
 
 
 class ParseUrlResponse(BaseModel):
@@ -25,7 +25,15 @@ class ParseUrlResponse(BaseModel):
 
 
 class PostCommentRequest(BaseModel):
-    body: str
+    body: str = Field(min_length=1, max_length=65536)
+
+    @field_validator("body")
+    @classmethod
+    def _strip_body(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("body must not be empty")
+        return value
 
 
 class CommentResponse(BaseModel):
@@ -53,13 +61,13 @@ class ConfigResponse(BaseModel):
 
 
 class CreateIssueRequest(BaseModel):
-    title: str
+    title: str = Field(min_length=1, max_length=256)
     environment: str | None = None
     base_branch: str | None = None
     severity: str | None = None
-    steps_to_reproduce: str
-    expected_result: str
-    actual_result: str
+    steps_to_reproduce: str = Field(min_length=1)
+    expected_result: str = Field(min_length=1)
+    actual_result: str = Field(min_length=1)
     additional_notes: str | None = None
     assignee: str | None = None
 
@@ -68,15 +76,36 @@ class CreateIssueRequest(BaseModel):
     def _validate_label_length(cls, value: str | None, info: ValidationInfo) -> str | None:
         if value is None:
             return value
-        prefix = LABEL_PREFIXES[info.field_name]
+        value = value.strip()
+        if not value:
+            return None
+        field_name = info.field_name
+        if field_name is None:
+            return value
+        prefix = LABEL_PREFIXES[field_name]
         max_value_length = GITHUB_LABEL_MAX_LENGTH - len(prefix)
         if len(value) > max_value_length:
             raise ValueError(
-                f"{info.field_name} must be at most {max_value_length} characters long "
+                f"{field_name} must be at most {max_value_length} characters long "
                 f"(GitHub labels are capped at {GITHUB_LABEL_MAX_LENGTH} characters, "
                 f"and this value is prefixed with {prefix!r})"
             )
         return value
+
+    @field_validator("title", "steps_to_reproduce", "expected_result", "actual_result")
+    @classmethod
+    def _strip_required_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("must not be empty")
+        return value
+
+    @field_validator("additional_notes", "assignee")
+    @classmethod
+    def _strip_optional_text(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return value.strip() or None
 
 
 class CreateIssueResponse(BaseModel):

@@ -39,6 +39,38 @@ class GitHubClient:
     ) -> Any:
         return await self._request("GET", path, not_found_error=not_found_error, headers=headers)
 
+    async def get_paginated(
+        self,
+        path: str,
+        *,
+        list_key: str | None = None,
+        not_found_error: type[GitHubError] = RepoNotFoundError,
+        headers: dict[str, str] | None = None,
+    ) -> list[dict[str, Any]]:
+        items: list[dict[str, Any]] = []
+        next_url: str | None = path
+        seen_urls: set[str] = set()
+
+        while next_url:
+            if next_url in seen_urls:
+                raise GitHubError(f"GitHub API returned a pagination loop: {path}")
+            seen_urls.add(next_url)
+            response = await self._request_response(
+                "GET",
+                next_url,
+                not_found_error=not_found_error,
+                headers=headers,
+            )
+            payload = response.json()
+            page = payload.get(list_key, []) if list_key else payload
+            if not isinstance(page, list):
+                raise GitHubError(f"GitHub API returned an invalid paginated response: {path}")
+            items.extend(page)
+            next_link = response.links.get("next")
+            next_url = next_link.get("url") if next_link else None
+
+        return items
+
     async def post(
         self,
         path: str,
@@ -56,6 +88,22 @@ class GitHubClient:
         not_found_error: type[GitHubError],
         **kwargs: Any,
     ) -> Any:
+        response = await self._request_response(
+            method,
+            path,
+            not_found_error=not_found_error,
+            **kwargs,
+        )
+        return response.json()
+
+    async def _request_response(
+        self,
+        method: str,
+        path: str,
+        *,
+        not_found_error: type[GitHubError],
+        **kwargs: Any,
+    ) -> httpx.Response:
         try:
             response = await self._client.request(method, path, **kwargs)
         except httpx.TimeoutException as exc:
@@ -80,4 +128,4 @@ class GitHubClient:
         if response.status_code >= 400:
             raise GitHubError(f"GitHub API error {response.status_code}: {response.text}")
 
-        return response.json()
+        return response

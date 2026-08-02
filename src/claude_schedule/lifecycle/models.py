@@ -40,7 +40,8 @@ CHECKPOINT_DESCRIPTIONS: dict[Checkpoint, str] = {
 
 def build_checkpoint_comment(checkpoint: Checkpoint, username: str) -> str:
     description = CHECKPOINT_DESCRIPTIONS[checkpoint]
-    return f"[LIFECYCLE:{checkpoint.value}]\n\n{description} by @{username}."
+    actor = f"@{username.strip()}" if username.strip() else "the operator"
+    return f"[LIFECYCLE:{checkpoint.value}]\n\n{description} by {actor}."
 
 
 class ParsedClaudeResponse(BaseModel):

@@ -1,6 +1,8 @@
+import asyncio
+
 from fastapi import APIRouter, Depends
 
-from claude_schedule.api.deps import get_github_service
+from claude_schedule.api.deps import ensure_repository_allowed, get_github_service
 from claude_schedule.api.issue_template import build_bug_report_body, build_labels_from_metadata
 from claude_schedule.api.schemas import (
     CheckpointRequest,
@@ -14,6 +16,7 @@ from claude_schedule.api.schemas import (
     PostCommentRequest,
 )
 from claude_schedule.github.errors import PullRequestNotFoundError
+from claude_schedule.github.models import CheckRun, Comment, Commit
 from claude_schedule.github.service import GitHubService
 from claude_schedule.github.url_parser import parse_issue_url
 from claude_schedule.lifecycle.engine import infer_stage
@@ -41,7 +44,9 @@ async def create_issue(
     repository: str,
     payload: CreateIssueRequest,
     service: GitHubService = Depends(get_github_service),
+    settings: Settings = Depends(get_settings),
 ) -> CreateIssueResponse:
+    ensure_repository_allowed(owner, repository, settings)
     body = build_bug_report_body(payload)
     labels = build_labels_from_metadata(payload)
     issue = await service.create_issue(owner, repository, payload.title, body, labels, payload.assignee)
@@ -56,18 +61,33 @@ async def get_issue_detail(
     service: GitHubService = Depends(get_github_service),
     settings: Settings = Depends(get_settings),
 ) -> IssueDetailResponse:
-    issue = await service.get_issue(owner, repository, issue_number)
-    issue_comments = await service.get_issue_comments(owner, repository, issue_number)
-    timeline_events = await service.get_issue_timeline(owner, repository, issue_number)
-    linked_pull_request = await service.find_linked_pull_request(owner, repository, issue_number)
+    ensure_repository_allowed(owner, repository, settings)
+    issue, issue_comments, timeline_events = await asyncio.gather(
+        service.get_issue(owner, repository, issue_number),
+        service.get_issue_comments(owner, repository, issue_number),
+        service.get_issue_timeline(owner, repository, issue_number),
+    )
+    linked_pull_request = await service.find_linked_pull_request(
+        owner,
+        repository,
+        issue_number,
+        timeline=timeline_events,
+    )
 
-    pr_comments = []
-    pr_commits = []
-    pr_checks = []
+    pr_comments: list[Comment] = []
+    pr_commits: list[Commit] = []
+    pr_checks: list[CheckRun] = []
     if linked_pull_request is not None:
-        pr_comments = await service.get_pull_request_comments(owner, repository, linked_pull_request.number)
-        pr_commits = await service.get_pull_request_commits(owner, repository, linked_pull_request.number)
-        pr_checks = await service.get_pull_request_checks(owner, repository, linked_pull_request.number)
+        pr_comments, pr_commits, pr_checks = await asyncio.gather(
+            service.get_pull_request_comments(owner, repository, linked_pull_request.number),
+            service.get_pull_request_commits(owner, repository, linked_pull_request.number),
+            service.get_pull_request_checks(
+                owner,
+                repository,
+                linked_pull_request.number,
+                head_sha=linked_pull_request.head_sha,
+            ),
+        )
 
     lifecycle = infer_stage(
         issue=issue,
@@ -107,7 +127,9 @@ async def post_issue_comment(
     issue_number: int,
     payload: PostCommentRequest,
     service: GitHubService = Depends(get_github_service),
+    settings: Settings = Depends(get_settings),
 ) -> CommentResponse:
+    ensure_repository_allowed(owner, repository, settings)
     comment = await service.post_issue_comment(owner, repository, issue_number, payload.body)
     return CommentResponse(comment=comment)
 
@@ -119,7 +141,9 @@ async def post_pull_request_comment(
     pr_number: int,
     payload: PostCommentRequest,
     service: GitHubService = Depends(get_github_service),
+    settings: Settings = Depends(get_settings),
 ) -> CommentResponse:
+    ensure_repository_allowed(owner, repository, settings)
     comment = await service.post_pull_request_comment(owner, repository, pr_number, payload.body)
     return CommentResponse(comment=comment)
 
@@ -133,6 +157,7 @@ async def post_checkpoint(
     service: GitHubService = Depends(get_github_service),
     settings: Settings = Depends(get_settings),
 ) -> CommentResponse:
+    ensure_repository_allowed(owner, repository, settings)
     body = build_checkpoint_comment(payload.checkpoint, settings.operator_github_username)
     target = CHECKPOINT_TARGET[payload.checkpoint]
 

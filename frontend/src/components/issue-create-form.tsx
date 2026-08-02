@@ -91,7 +91,7 @@ export function IssueCreateForm({ onCreated }: IssueCreateFormProps) {
 
       <label>
         Title *
-        <input value={title} onChange={(e) => setTitle(e.target.value)} required />
+        <input value={title} maxLength={256} onChange={(e) => setTitle(e.target.value)} required />
       </label>
 
       <div className="issue-create-form__row">
@@ -99,6 +99,7 @@ export function IssueCreateForm({ onCreated }: IssueCreateFormProps) {
           Environment
           <input
             placeholder="dev / staging / prod"
+            maxLength={46}
             value={environment}
             onChange={(e) => setEnvironment(e.target.value)}
           />
@@ -107,6 +108,7 @@ export function IssueCreateForm({ onCreated }: IssueCreateFormProps) {
           Base branch
           <input
             placeholder="develop"
+            maxLength={45}
             value={baseBranch}
             onChange={(e) => setBaseBranch(e.target.value)}
           />

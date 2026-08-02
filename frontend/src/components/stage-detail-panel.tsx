@@ -1,5 +1,9 @@
 import { STAGE_LABELS } from "../api/types";
 import type { CheckRun, Commit, LifecycleResult, PullRequest } from "../api/types";
+import {
+  claudeResponseStatus,
+  type ClaudeResponseStatus,
+} from "../lib/claude-response-status";
 
 interface StageDetailPanelProps {
   lifecycle: LifecycleResult;
@@ -13,6 +17,26 @@ function latestCommit(commits: Commit[]): Commit | null {
   return commits[commits.length - 1];
 }
 
+type CheckState = "success" | "failure" | "pending";
+
+function checkState(check: CheckRun): CheckState {
+  if (check.conclusion === "success") return "success";
+  if (check.conclusion) return "failure";
+  return "pending";
+}
+
+const CHECK_ICON: Record<CheckState, string> = {
+  success: "✓",
+  failure: "✕",
+  pending: "●",
+};
+
+const CLAUDE_RESPONSE_LABEL: Record<ClaudeResponseStatus, string> = {
+  passed: "Passed",
+  failed: "Failed",
+  responded: "Responded",
+};
+
 export function StageDetailPanel({
   lifecycle,
   linkedPullRequest,
@@ -23,69 +47,41 @@ export function StageDetailPanel({
 
   return (
     <section className="stage-detail-panel">
-      <h2>Current Stage: {STAGE_LABELS[lifecycle.stage]}</h2>
+      <div className="stage-detail-panel__head">
+        <h2>Workspace · {STAGE_LABELS[lifecycle.stage]}</h2>
+        {lifecycle.last_command && (
+          <p className="stage-detail-panel__last-command">
+            Last command: <code>{lifecycle.last_command}</code>
+          </p>
+        )}
+      </div>
 
-      <div className="stage-detail-panel__grid">
-        <div>
-          <strong>Last command</strong>
-          <p>{lifecycle.last_command ?? "—"}</p>
-        </div>
-
-        <div>
-          <strong>Last Claude response</strong>
-          {lifecycle.last_claude_response ? (
-            lifecycle.last_claude_response.is_structured ? (
-              <div>
-                {lifecycle.last_claude_response.root_cause && (
-                  <p>
-                    <em>Root cause:</em> {lifecycle.last_claude_response.root_cause}
-                  </p>
-                )}
-                {lifecycle.last_claude_response.findings.length > 0 && (
-                  <ul>
-                    {lifecycle.last_claude_response.findings.map((finding, index) => (
-                      <li key={index}>{finding}</li>
-                    ))}
-                  </ul>
-                )}
-                {lifecycle.last_claude_response.test_result && (
-                  <p>
-                    <em>Test result:</em> {lifecycle.last_claude_response.test_result}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div>
-                <span className="badge badge--unstructured">Unstructured response</span>
-                <p className="stage-detail-panel__raw-body">
-                  {lifecycle.last_claude_response.raw_body}
-                </p>
-              </div>
-            )
-          ) : (
-            <p>—</p>
-          )}
-        </div>
-
-        <div>
-          <strong>Pull Request</strong>
+      <div className="stage-detail-panel__sections">
+        <div className="stage-detail-panel__section">
+          <h3>Pull Request</h3>
           {linkedPullRequest ? (
             <p>
               <a href={linkedPullRequest.html_url} target="_blank" rel="noreferrer">
                 #{linkedPullRequest.number} {linkedPullRequest.title}
               </a>
               <br />
-              {linkedPullRequest.head_branch} → {linkedPullRequest.base_branch}
+              <span className="stage-detail-panel__muted">
+                {linkedPullRequest.head_branch} → {linkedPullRequest.base_branch}
+              </span>
               <br />
-              {linkedPullRequest.merged ? "Merged" : linkedPullRequest.state}
+              <span
+                className={`badge badge--${linkedPullRequest.merged ? "closed" : linkedPullRequest.state}`}
+              >
+                {linkedPullRequest.merged ? "Merged" : linkedPullRequest.state}
+              </span>
             </p>
           ) : (
-            <p>No linked Pull Request yet.</p>
+            <p className="stage-detail-panel__muted">No linked Pull Request yet.</p>
           )}
         </div>
 
-        <div>
-          <strong>Latest commit</strong>
+        <div className="stage-detail-panel__section">
+          <h3>Latest commit</h3>
           {commit ? (
             <p>
               <a href={commit.html_url} target="_blank" rel="noreferrer">
@@ -94,28 +90,65 @@ export function StageDetailPanel({
               {commit.message}
             </p>
           ) : (
-            <p>—</p>
+            <p className="stage-detail-panel__muted">—</p>
           )}
         </div>
 
-        <div>
-          <strong>CI / check status</strong>
+        <div className="stage-detail-panel__section">
+          <h3>CI / Checks</h3>
           {prChecks.length > 0 ? (
-            <ul>
-              {prChecks.map((check) => (
-                <li key={check.name}>
-                  {check.name}: {check.status}
-                  {check.conclusion ? ` / ${check.conclusion}` : ""}
-                </li>
-              ))}
+            <ul className="check-list">
+              {prChecks.map((check) => {
+                const state = checkState(check);
+                return (
+                  <li key={check.name} className="check-list__item">
+                    <span className={`check-list__icon check-list__icon--${state}`}>
+                      {CHECK_ICON[state]}
+                    </span>
+                    <span className="check-list__name">{check.name}</span>
+                    <span className={`check-list__status check-list__status--${state}`}>
+                      {check.conclusion ?? check.status}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
-            <p>No checks reported.</p>
+            <p className="stage-detail-panel__muted">No checks reported.</p>
           )}
         </div>
 
-        <div>
-          <strong>Review findings</strong>
+        <div className="stage-detail-panel__section">
+          <h3>Claude response</h3>
+          {lifecycle.last_claude_response ? (
+            (() => {
+              const response = lifecycle.last_claude_response;
+              const status = claudeResponseStatus(response.raw_body);
+              return (
+                <div className="stage-detail-panel__response">
+                  <span className={`badge badge--${status}`}>{CLAUDE_RESPONSE_LABEL[status]}</span>
+                  {response.root_cause && (
+                    <p>
+                      <strong>Root cause:</strong> {response.root_cause}
+                    </p>
+                  )}
+                  {response.findings.length > 0 && (
+                    <ul>
+                      {response.findings.map((finding, index) => (
+                        <li key={index}>{finding}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })()
+          ) : (
+            <p className="stage-detail-panel__muted">—</p>
+          )}
+        </div>
+
+        <div className="stage-detail-panel__section">
+          <h3>Review findings</h3>
           {lifecycle.review_findings.length > 0 ? (
             <ul>
               {lifecycle.review_findings.map((finding, index) => (
@@ -123,27 +156,28 @@ export function StageDetailPanel({
               ))}
             </ul>
           ) : (
-            <p>—</p>
+            <p className="stage-detail-panel__muted">—</p>
           )}
         </div>
 
-        <div>
-          <strong>Test result</strong>
-          <p>{lifecycle.test_result ?? "—"}</p>
+        <div className="stage-detail-panel__section">
+          <h3>Test result</h3>
+          <p className="stage-detail-panel__muted">{lifecycle.test_result ?? "—"}</p>
         </div>
       </div>
 
-      <div className="stage-detail-panel__reasoning">
-        <strong>Why this stage:</strong>
+      <details className="stage-detail-panel__reasoning">
+        <summary>Why this stage</summary>
         <ul>
           {lifecycle.reasoning.map((reason, index) => (
             <li key={index}>{reason}</li>
           ))}
         </ul>
-      </div>
+      </details>
 
       <div className="stage-detail-panel__next-action">
-        <strong>Next recommended action:</strong> {lifecycle.next_recommended_action}
+        <span className="stage-detail-panel__next-action-label">Next recommended action</span>
+        <p>{lifecycle.next_recommended_action}</p>
       </div>
     </section>
   );

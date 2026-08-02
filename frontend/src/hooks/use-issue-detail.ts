@@ -27,20 +27,28 @@ export function useIssueDetail(
   const [isWaitingForClaude, setIsWaitingForClaude] = useState(false);
   const [pollAttempts, setPollAttempts] = useState(0);
   const postedAtRef = useRef<string | null>(null);
+  const requestSequenceRef = useRef(0);
+  const activeControllerRef = useRef<AbortController | null>(null);
 
   const load = useCallback(async (): Promise<IssueDetailResponse | null> => {
     if (!owner || !repository || issueNumber === null) return null;
+    const sequence = ++requestSequenceRef.current;
+    activeControllerRef.current?.abort();
+    const controller = new AbortController();
+    activeControllerRef.current = controller;
     setLoading(true);
     setError(null);
     try {
-      const result = await getIssueDetail(owner, repository, issueNumber);
+      const result = await getIssueDetail(owner, repository, issueNumber, controller.signal);
+      if (sequence !== requestSequenceRef.current) return null;
       setData(result);
       return result;
     } catch (err) {
+      if (controller.signal.aborted || sequence !== requestSequenceRef.current) return null;
       setError(err as Error);
       return null;
     } finally {
-      setLoading(false);
+      if (sequence === requestSequenceRef.current) setLoading(false);
     }
   }, [owner, repository, issueNumber]);
 
@@ -49,7 +57,11 @@ export function useIssueDetail(
   }, [load]);
 
   useEffect(() => {
+    setData(null);
+    setIsWaitingForClaude(false);
+    setPollAttempts(0);
     void load();
+    return () => activeControllerRef.current?.abort();
   }, [load]);
 
   const startWaitingForClaude = useCallback(() => {
