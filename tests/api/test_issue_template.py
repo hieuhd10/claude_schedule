@@ -1,3 +1,6 @@
+import pytest
+from pydantic import ValidationError
+
 from claude_schedule.api.issue_template import build_bug_report_body, build_labels_from_metadata
 from claude_schedule.api.schemas import CreateIssueRequest
 
@@ -47,3 +50,25 @@ def test_build_labels_from_metadata():
 def test_build_labels_from_metadata_empty_when_no_fields():
     labels = build_labels_from_metadata(_request(environment=None, base_branch=None, severity=None))
     assert labels == []
+
+
+def test_build_labels_from_metadata_accepts_max_length_values():
+    labels = build_labels_from_metadata(
+        _request(environment="e" * 46, base_branch="b" * 45, severity="s" * 41)
+    )
+    assert labels == [f"env:{'e' * 46}", f"base:{'b' * 45}", f"severity:{'s' * 41}"]
+
+
+def test_environment_longer_than_github_label_limit_is_rejected():
+    with pytest.raises(ValidationError, match="environment"):
+        _request(environment="staging-eu-west-1-canary-deploy-slot-42-blue-green")
+
+
+def test_base_branch_longer_than_github_label_limit_is_rejected():
+    with pytest.raises(ValidationError, match="base_branch"):
+        _request(base_branch="b" * 46)
+
+
+def test_severity_longer_than_github_label_limit_is_rejected():
+    with pytest.raises(ValidationError, match="severity"):
+        _request(severity="s" * 42)
