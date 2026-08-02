@@ -301,6 +301,7 @@ def test_completed_stage():
         claude_bot_login=CLAUDE_LOGIN,
     )
     assert result.stage == Stage.COMPLETED
+    assert result.test_result == "PASSED"
 
 
 def test_completed_stage_when_issue_closed_without_pull_request():

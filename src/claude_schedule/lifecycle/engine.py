@@ -80,6 +80,7 @@ def infer_stage(
     test_result: str | None = None
 
     if issue.state == IssueState.CLOSED:
+        test_result = test_marker
         if linked_pull_request and linked_pull_request.merged:
             reasoning.append("Issue is closed and the linked Pull Request is merged.")
         elif linked_pull_request:

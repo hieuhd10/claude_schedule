@@ -20,13 +20,14 @@ const STEP_CAPTION: Record<StepState, string> = {
 
 export function LifecycleStepper({ currentStage }: LifecycleStepperProps) {
   const currentIndex = STAGES.indexOf(currentStage);
+  const isLifecycleComplete = currentStage === "completed";
 
   return (
     <ol className="lifecycle-stepper">
       {STAGES.map((stage, index) => {
         let state: StepState = "upcoming";
-        if (index < currentIndex) state = "done";
-        if (index === currentIndex) state = "current";
+        if (isLifecycleComplete || index < currentIndex) state = "done";
+        else if (index === currentIndex) state = "current";
 
         return (
           <li key={stage} className={`lifecycle-stepper__step lifecycle-stepper__step--${state}`}>
