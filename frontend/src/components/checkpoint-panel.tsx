@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import type { Comment, Stage } from "../api/types";
 import { usePostComment } from "../hooks/use-post-comment";
-import { CHECKPOINT_ACTIONS } from "../lib/checkpoints";
+import { DEBUG_APPROVAL_ACTION } from "../lib/checkpoints";
 
 interface CheckpointPanelProps {
   owner: string;
@@ -24,9 +24,6 @@ export function CheckpointPanel({
 
   if (currentStage !== "debug") return null;
 
-  const action = CHECKPOINT_ACTIONS.find((item) => item.checkpoint === "DEBUG_APPROVED");
-  if (!action) return null;
-
   return (
     <section className="checkpoint-panel">
       <h2>Ready to move forward?</h2>
@@ -39,7 +36,12 @@ export function CheckpointPanel({
           className="checkpoint-panel__action--relevant"
           disabled={submitting}
           onClick={async () => {
-            const comment = await submitCheckpoint(owner, repository, issueNumber, action.checkpoint);
+            const comment = await submitCheckpoint(
+              owner,
+              repository,
+              issueNumber,
+              DEBUG_APPROVAL_ACTION.checkpoint,
+            );
             if (comment) {
               setLastPostedUrl(comment.html_url);
               onPosted(comment);

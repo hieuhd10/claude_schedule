@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from claude_schedule.api.deps import get_github_service
 from claude_schedule.github.models import Comment, Issue, IssueState
 from claude_schedule.main import app
+from claude_schedule.settings import Settings, get_settings
 
 
 def _dt() -> datetime:
@@ -115,6 +116,29 @@ def test_get_issue_detail_no_pr(client):
     assert body["issue"]["number"] == 128
     assert body["linked_pull_request"] is None
     assert body["lifecycle"]["stage"] == "debug"
+
+
+def test_repository_guard_rejects_mismatched_repository(client):
+    settings = Settings(github_owner="hieuhd10", github_repository="claude_schedule")
+    app.dependency_overrides[get_settings] = lambda: settings
+    try:
+        response = client.get("/api/issues/another-owner/another-repository/128")
+    finally:
+        app.dependency_overrides.pop(get_settings, None)
+
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "REPOSITORY_NOT_ALLOWED"
+
+
+def test_repository_guard_allows_configured_repository_case_insensitively(client):
+    settings = Settings(github_owner="HieuHD10", github_repository="Claude_Schedule")
+    app.dependency_overrides[get_settings] = lambda: settings
+    try:
+        response = client.get("/api/issues/hieuhd10/claude_schedule/128")
+    finally:
+        app.dependency_overrides.pop(get_settings, None)
+
+    assert response.status_code == 200
 
 
 def test_post_issue_comment(client, fake_service):

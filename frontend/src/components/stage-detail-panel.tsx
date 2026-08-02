@@ -1,5 +1,9 @@
 import { STAGE_LABELS } from "../api/types";
 import type { CheckRun, Commit, LifecycleResult, PullRequest } from "../api/types";
+import {
+  claudeResponseStatus,
+  type ClaudeResponseStatus,
+} from "../lib/claude-response-status";
 
 interface StageDetailPanelProps {
   lifecycle: LifecycleResult;
@@ -26,17 +30,6 @@ const CHECK_ICON: Record<CheckState, string> = {
   failure: "✕",
   pending: "●",
 };
-
-type ClaudeResponseStatus = "passed" | "failed" | "responded";
-
-const PASSED_RE = /\b(REVIEW|TEST) PASSED\b/i;
-const FAILED_RE = /\b(REVIEW|TEST) FAILED\b/i;
-
-function claudeResponseStatus(rawBody: string): ClaudeResponseStatus {
-  if (FAILED_RE.test(rawBody)) return "failed";
-  if (PASSED_RE.test(rawBody)) return "passed";
-  return "responded";
-}
 
 const CLAUDE_RESPONSE_LABEL: Record<ClaudeResponseStatus, string> = {
   passed: "Passed",
@@ -129,9 +122,24 @@ export function StageDetailPanel({
           <h3>Claude response</h3>
           {lifecycle.last_claude_response ? (
             (() => {
-              const status = claudeResponseStatus(lifecycle.last_claude_response.raw_body);
+              const response = lifecycle.last_claude_response;
+              const status = claudeResponseStatus(response.raw_body);
               return (
-                <span className={`badge badge--${status}`}>{CLAUDE_RESPONSE_LABEL[status]}</span>
+                <div className="stage-detail-panel__response">
+                  <span className={`badge badge--${status}`}>{CLAUDE_RESPONSE_LABEL[status]}</span>
+                  {response.root_cause && (
+                    <p>
+                      <strong>Root cause:</strong> {response.root_cause}
+                    </p>
+                  )}
+                  {response.findings.length > 0 && (
+                    <ul>
+                      {response.findings.map((finding, index) => (
+                        <li key={index}>{finding}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               );
             })()
           ) : (
