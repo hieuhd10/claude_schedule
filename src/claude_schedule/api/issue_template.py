@@ -1,4 +1,4 @@
-from claude_schedule.api.schemas import CreateIssueRequest
+from claude_schedule.api.schemas import LABEL_PREFIXES, CreateIssueRequest
 
 
 def build_bug_report_body(request: CreateIssueRequest) -> str:
@@ -23,9 +23,9 @@ def build_bug_report_body(request: CreateIssueRequest) -> str:
 def build_labels_from_metadata(request: CreateIssueRequest) -> list[str]:
     labels = []
     if request.environment:
-        labels.append(f"env:{request.environment}")
+        labels.append(f"{LABEL_PREFIXES['environment']}{request.environment}")
     if request.base_branch:
-        labels.append(f"base:{request.base_branch}")
+        labels.append(f"{LABEL_PREFIXES['base_branch']}{request.base_branch}")
     if request.severity:
-        labels.append(f"severity:{request.severity}")
+        labels.append(f"{LABEL_PREFIXES['severity']}{request.severity}")
     return labels

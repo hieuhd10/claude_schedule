@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from claude_schedule.api.issue_template import build_bug_report_body, build_labels_from_metadata
-from claude_schedule.api.schemas import CreateIssueRequest
+from claude_schedule.api.schemas import LABEL_PREFIXES, CreateIssueRequest
 
 
 def _request(**overrides) -> CreateIssueRequest:
@@ -45,6 +45,15 @@ def test_build_bug_report_body_includes_additional_notes_when_present():
 def test_build_labels_from_metadata():
     labels = build_labels_from_metadata(_request())
     assert labels == ["env:dev", "base:develop", "severity:high"]
+
+
+def test_build_labels_from_metadata_uses_shared_label_prefixes_constant():
+    labels = build_labels_from_metadata(_request())
+    assert labels == [
+        f"{LABEL_PREFIXES['environment']}dev",
+        f"{LABEL_PREFIXES['base_branch']}develop",
+        f"{LABEL_PREFIXES['severity']}high",
+    ]
 
 
 def test_build_labels_from_metadata_empty_when_no_fields():
