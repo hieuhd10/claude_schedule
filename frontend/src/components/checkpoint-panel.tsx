@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { Comment, PullRequest } from "../api/types";
+import type { Comment, Stage } from "../api/types";
 import { usePostComment } from "../hooks/use-post-comment";
 import { CHECKPOINT_ACTIONS } from "../lib/checkpoints";
 
@@ -8,7 +8,7 @@ interface CheckpointPanelProps {
   owner: string;
   repository: string;
   issueNumber: number;
-  linkedPullRequest: PullRequest | null;
+  currentStage: Stage;
   onPosted: (comment: Comment) => void;
 }
 
@@ -16,45 +16,38 @@ export function CheckpointPanel({
   owner,
   repository,
   issueNumber,
-  linkedPullRequest,
+  currentStage,
   onPosted,
 }: CheckpointPanelProps) {
   const { submitCheckpoint, submitting, error } = usePostComment();
   const [lastPostedUrl, setLastPostedUrl] = useState<string | null>(null);
 
+  if (currentStage !== "debug") return null;
+
+  const action = CHECKPOINT_ACTIONS.find((item) => item.checkpoint === "DEBUG_APPROVED");
+  if (!action) return null;
+
   return (
     <section className="checkpoint-panel">
-      <h2>Human Checkpoints</h2>
+      <h2>Ready to move forward?</h2>
       <p className="checkpoint-panel__hint">
-        Recording a checkpoint posts a standardized comment to GitHub so the confirmation stays
-        the source of truth across devices.
+        Once the investigation is accepted, record approval to move this issue into Fix.
       </p>
       <div className="checkpoint-panel__actions">
-        {CHECKPOINT_ACTIONS.map((action) => {
-          const disabled = action.requiresPullRequest && !linkedPullRequest;
-          return (
-            <button
-              key={action.checkpoint}
-              type="button"
-              disabled={disabled || submitting}
-              title={disabled ? "Requires a linked Pull Request" : undefined}
-              onClick={async () => {
-                const comment = await submitCheckpoint(
-                  owner,
-                  repository,
-                  issueNumber,
-                  action.checkpoint,
-                );
-                if (comment) {
-                  setLastPostedUrl(comment.html_url);
-                  onPosted(comment);
-                }
-              }}
-            >
-              {action.label}
-            </button>
-          );
-        })}
+        <button
+          type="button"
+          className="checkpoint-panel__action--relevant"
+          disabled={submitting}
+          onClick={async () => {
+            const comment = await submitCheckpoint(owner, repository, issueNumber, action.checkpoint);
+            if (comment) {
+              setLastPostedUrl(comment.html_url);
+              onPosted(comment);
+            }
+          }}
+        >
+          {submitting ? "Recording…" : "Approve debug and start Fix"}
+        </button>
       </div>
       {error && <div className="status-banner status-banner--error">{error.message}</div>}
       {lastPostedUrl && (

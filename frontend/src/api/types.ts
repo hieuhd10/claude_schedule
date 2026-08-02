@@ -154,10 +154,13 @@ export class ApiError extends Error {
   status: number;
   retryAfter?: number;
 
-  constructor(status: number, body: ApiErrorBody) {
-    super(body.error.message);
-    this.code = body.error.code;
+  constructor(status: number, body: unknown) {
+    const fallbackMessage = `Request failed with status ${status}`;
+    const parsed = body as Partial<ApiErrorBody> | null;
+    const error = parsed?.error;
+    super(error?.message ?? fallbackMessage);
+    this.code = error?.code ?? "HTTP_ERROR";
     this.status = status;
-    this.retryAfter = body.error.retry_after;
+    this.retryAfter = error?.retry_after;
   }
 }

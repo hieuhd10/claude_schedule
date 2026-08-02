@@ -41,9 +41,15 @@ function App() {
 
   return (
     <div className="app">
-      <h1 className="app__title">GitHub Issue Lifecycle</h1>
+      <header className="app__header">
+        <div className="app__brand-mark" aria-hidden="true">CS</div>
+        <div>
+          <h1 className="app__title">Issue completion workspace</h1>
+          <p>Track every step from bug report to verified resolution, with human or Claude-assisted comments.</p>
+        </div>
+      </header>
 
-      <div className="app__mode-tabs">
+      <nav className="app__mode-tabs" aria-label="Issue setup">
         <button
           type="button"
           className={mode === "load" ? "active" : ""}
@@ -58,13 +64,24 @@ function App() {
         >
           Report a new Issue (QA)
         </button>
-      </div>
+      </nav>
 
       {mode === "load" && (
         <>
-          <IssueUrlForm onSubmit={handleSubmit} submitting={parsing} />
+          <section className="app__intake-card">
+            <span className="eyebrow">Continue tracking</span>
+            <h2>Load an existing GitHub Issue</h2>
+            <p>Paste the issue URL to rebuild its lifecycle from GitHub activity.</p>
+            <IssueUrlForm onSubmit={handleSubmit} submitting={parsing} />
+          </section>
           {parseError && <StatusBanner error={parseError} />}
-          {!target && !parseError && <StatusBanner empty />}
+          {!target && !parseError && (
+            <div className="app__empty-state">
+              <div><strong>1</strong><span>Create or load an issue</span></div>
+              <div><strong>2</strong><span>Comment manually or ask Claude at every stage</span></div>
+              <div><strong>3</strong><span>Verify, merge, and close with a complete timeline</span></div>
+            </div>
+          )}
         </>
       )}
 
@@ -77,12 +94,14 @@ function App() {
         />
       )}
 
-      {target && (
-        <IssueDetailPage
-          owner={target.owner}
-          repository={target.repository}
-          issueNumber={target.issueNumber}
-        />
+      {mode === "load" && target && (
+        <main>
+          <IssueDetailPage
+            owner={target.owner}
+            repository={target.repository}
+            issueNumber={target.issueNumber}
+          />
+        </main>
       )}
     </div>
   );

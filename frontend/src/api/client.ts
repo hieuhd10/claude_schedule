@@ -1,6 +1,5 @@
 import {
   ApiError,
-  type ApiErrorBody,
   type Checkpoint,
   type Comment,
   type ConfigResponse,
@@ -31,7 +30,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    const body = (await response.json()) as ApiErrorBody;
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      // Preserve a useful status-based error when a proxy returns HTML or an empty body.
+    }
     throw new ApiError(response.status, body);
   }
 
@@ -49,8 +53,12 @@ export function getIssueDetail(
   owner: string,
   repository: string,
   issueNumber: number,
+  signal?: AbortSignal,
 ): Promise<IssueDetailResponse> {
-  return request<IssueDetailResponse>(`/api/issues/${owner}/${repository}/${issueNumber}`);
+  return request<IssueDetailResponse>(
+    `/api/issues/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}/${issueNumber}`,
+    { signal },
+  );
 }
 
 export function postIssueComment(
@@ -59,7 +67,7 @@ export function postIssueComment(
   issueNumber: number,
   body: string,
 ): Promise<CommentResponse> {
-  return request<CommentResponse>(`/api/issues/${owner}/${repository}/${issueNumber}/comments`, {
+  return request<CommentResponse>(`/api/issues/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}/${issueNumber}/comments`, {
     method: "POST",
     body: JSON.stringify({ body }),
   });
@@ -72,7 +80,7 @@ export function postPullRequestComment(
   body: string,
 ): Promise<CommentResponse> {
   return request<CommentResponse>(
-    `/api/pull-requests/${owner}/${repository}/${prNumber}/comments`,
+    `/api/pull-requests/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}/${prNumber}/comments`,
     {
       method: "POST",
       body: JSON.stringify({ body }),
@@ -89,7 +97,7 @@ export function createIssue(
   repository: string,
   payload: CreateIssueRequest,
 ): Promise<CreateIssueResponse> {
-  return request<CreateIssueResponse>(`/api/issues/${owner}/${repository}`, {
+  return request<CreateIssueResponse>(`/api/issues/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -101,7 +109,7 @@ export function postCheckpoint(
   issueNumber: number,
   checkpoint: Checkpoint,
 ): Promise<CommentResponse> {
-  return request<CommentResponse>(`/api/issues/${owner}/${repository}/${issueNumber}/checkpoints`, {
+  return request<CommentResponse>(`/api/issues/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}/${issueNumber}/checkpoints`, {
     method: "POST",
     body: JSON.stringify({ checkpoint }),
   });

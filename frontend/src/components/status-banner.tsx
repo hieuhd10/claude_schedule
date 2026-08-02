@@ -24,6 +24,8 @@ function describeError(error: Error): { title: string; detail: string } {
           title: "Permission denied",
           detail: "Repository is private or the token lacks the required scope.",
         };
+      case "REPOSITORY_NOT_ALLOWED":
+        return { title: "Repository not enabled", detail: error.message };
       case "RATE_LIMITED":
         return {
           title: "GitHub rate limit exceeded",
@@ -37,6 +39,8 @@ function describeError(error: Error): { title: string; detail: string } {
         return { title: "GitHub API timed out", detail: error.message };
       case "INVALID_URL":
         return { title: "Invalid Issue URL", detail: error.message };
+      case "VALIDATION_ERROR":
+        return { title: "Please check the form", detail: error.message };
       default:
         return { title: "GitHub API error", detail: error.message };
     }
