@@ -228,6 +228,74 @@ def test_completed_stage():
     assert result.stage == Stage.COMPLETED
 
 
+def test_review_prompt_text_does_not_advance_stage_before_claude_responds():
+    # The quick-action prompt itself mentions both marker words as instructions to
+    # Claude ("report REVIEW PASSED or REVIEW FAILED"). Posting it must not be
+    # mistaken for an actual result before Claude has replied.
+    result = infer_stage(
+        issue=_issue(),
+        issue_comments=[],
+        linked_pull_request=_pull_request(),
+        pr_comments=[
+            _comment(
+                4,
+                "@claude Please review this Pull Request and report REVIEW PASSED or REVIEW FAILED with findings.",
+                "hieuhd10",
+                4,
+            )
+        ],
+        checks=[],
+        claude_bot_login=CLAUDE_LOGIN,
+    )
+    assert result.stage == Stage.REVIEW
+    assert "Post a @claude review command" in result.next_recommended_action
+
+
+def test_test_prompt_text_does_not_advance_stage_before_claude_responds():
+    result = infer_stage(
+        issue=_issue(),
+        issue_comments=[],
+        linked_pull_request=_pull_request(),
+        pr_comments=[
+            _comment(5, "REVIEW PASSED", CLAUDE_LOGIN, 5),
+            _comment(
+                6,
+                "@claude Please run the tests for this Pull Request and report TEST PASSED or TEST FAILED.",
+                "hieuhd10",
+                6,
+            ),
+        ],
+        checks=[],
+        claude_bot_login=CLAUDE_LOGIN,
+    )
+    assert result.stage == Stage.TEST
+    assert result.test_result is None
+    assert "Run tests on the Pull Request" in result.next_recommended_action
+
+
+def test_marker_embedded_mid_line_in_claude_comment_is_not_honored():
+    # Even from Claude's own comment, a marker mid-sentence (not on its own line)
+    # must not count as a result.
+    result = infer_stage(
+        issue=_issue(),
+        issue_comments=[],
+        linked_pull_request=_pull_request(),
+        pr_comments=[
+            _comment(4, "@claude review this PR", "hieuhd10", 4),
+            _comment(
+                5,
+                "I will report REVIEW PASSED or REVIEW FAILED once I finish checking.",
+                CLAUDE_LOGIN,
+                5,
+            ),
+        ],
+        checks=[],
+        claude_bot_login=CLAUDE_LOGIN,
+    )
+    assert result.stage == Stage.REVIEW
+    assert "Post a @claude review command" in result.next_recommended_action
+
+
 def test_completed_stage_when_issue_closed_without_pull_request():
     result = infer_stage(
         issue=_issue(state=IssueState.CLOSED),
