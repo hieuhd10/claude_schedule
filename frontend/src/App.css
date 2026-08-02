@@ -496,6 +496,21 @@ a.badge {
   margin: 4px 0 0;
   padding-left: 18px;
 }
+.stage-detail-panel__response-details {
+  margin-top: 10px;
+}
+.stage-detail-panel__response-details summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+}
+.stage-detail-panel__response-details-body {
+  max-height: 320px;
+  margin-top: 8px;
+  padding-right: 6px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
 .stage-detail-panel__muted {
   color: var(--text);
 }
