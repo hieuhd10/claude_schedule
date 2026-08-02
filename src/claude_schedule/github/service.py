@@ -20,6 +20,11 @@ _TIMELINE_ACCEPT_HEADER = {
     "Accept": "application/vnd.github+json,application/vnd.github.mockingbird-preview+json"
 }
 
+# The check-runs endpoint wraps its list in a {"check_runs": [...]} envelope instead of
+# returning a bare array, so it can't use GitHubClient.get_all_pages and paginates manually.
+_CHECK_RUN_PAGE_SIZE = 100
+_MAX_CHECK_RUN_PAGES = 20
+
 
 def _parse_datetime(value: str | None) -> datetime | None:
     if not value:
@@ -153,7 +158,7 @@ class GitHubService:
         return _map_issue(raw)
 
     async def get_issue_comments(self, owner: str, repository: str, issue_number: int) -> list[Comment]:
-        raw = await self._client.get(
+        raw = await self._client.get_all_pages(
             f"/repos/{owner}/{repository}/issues/{issue_number}/comments",
             not_found_error=IssueNotFoundError,
         )
@@ -162,7 +167,7 @@ class GitHubService:
     async def get_issue_timeline(
         self, owner: str, repository: str, issue_number: int
     ) -> list[TimelineEvent]:
-        raw = await self._client.get(
+        raw = await self._client.get_all_pages(
             f"/repos/{owner}/{repository}/issues/{issue_number}/timeline",
             not_found_error=IssueNotFoundError,
             headers=_TIMELINE_ACCEPT_HEADER,
@@ -202,7 +207,7 @@ class GitHubService:
     async def get_pull_request_comments(
         self, owner: str, repository: str, pr_number: int
     ) -> list[Comment]:
-        raw = await self._client.get(
+        raw = await self._client.get_all_pages(
             f"/repos/{owner}/{repository}/issues/{pr_number}/comments",
             not_found_error=PullRequestNotFoundError,
         )
@@ -211,7 +216,7 @@ class GitHubService:
     async def get_pull_request_commits(
         self, owner: str, repository: str, pr_number: int
     ) -> list[Commit]:
-        raw = await self._client.get(
+        raw = await self._client.get_all_pages(
             f"/repos/{owner}/{repository}/pulls/{pr_number}/commits",
             not_found_error=PullRequestNotFoundError,
         )
@@ -221,11 +226,18 @@ class GitHubService:
         self, owner: str, repository: str, pr_number: int
     ) -> list[CheckRun]:
         pull_request = await self.get_pull_request(owner, repository, pr_number)
-        raw = await self._client.get(
-            f"/repos/{owner}/{repository}/commits/{pull_request.head_sha}/check-runs",
-            not_found_error=PullRequestNotFoundError,
-        )
-        return [_map_check_run(item) for item in raw.get("check_runs", [])]
+        check_runs: list[dict] = []
+        for page in range(1, _MAX_CHECK_RUN_PAGES + 1):
+            raw = await self._client.get(
+                f"/repos/{owner}/{repository}/commits/{pull_request.head_sha}/check-runs",
+                not_found_error=PullRequestNotFoundError,
+                params={"per_page": _CHECK_RUN_PAGE_SIZE, "page": page},
+            )
+            batch = raw.get("check_runs", [])
+            check_runs.extend(batch)
+            if len(batch) < _CHECK_RUN_PAGE_SIZE:
+                break
+        return [_map_check_run(item) for item in check_runs]
 
     async def post_issue_comment(
         self, owner: str, repository: str, issue_number: int, body: str

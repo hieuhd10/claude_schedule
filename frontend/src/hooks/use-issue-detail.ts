@@ -27,22 +27,40 @@ export function useIssueDetail(
   const [isWaitingForClaude, setIsWaitingForClaude] = useState(false);
   const [pollAttempts, setPollAttempts] = useState(0);
   const postedAtRef = useRef<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const latestRequestIdRef = useRef(0);
 
   const load = useCallback(async (): Promise<IssueDetailResponse | null> => {
     if (!owner || !repository || issueNumber === null) return null;
+
+    // Cancel any in-flight request so a slow, superseded response can't
+    // land after a newer one and overwrite fresher data (e.g. refresh
+    // firing while a poll tick is still pending).
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const requestId = ++latestRequestIdRef.current;
+
     setLoading(true);
     setError(null);
     try {
-      const result = await getIssueDetail(owner, repository, issueNumber);
+      const result = await getIssueDetail(owner, repository, issueNumber, controller.signal);
+      if (latestRequestIdRef.current !== requestId) return null;
       setData(result);
       return result;
     } catch (err) {
+      if (controller.signal.aborted) return null;
+      if (latestRequestIdRef.current !== requestId) return null;
       setError(err as Error);
       return null;
     } finally {
-      setLoading(false);
+      if (latestRequestIdRef.current === requestId) setLoading(false);
     }
   }, [owner, repository, issueNumber]);
+
+  useEffect(() => {
+    return () => abortControllerRef.current?.abort();
+  }, []);
 
   const refresh = useCallback(async () => {
     await load();

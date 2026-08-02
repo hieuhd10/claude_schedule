@@ -82,6 +82,19 @@ async def test_get_issue_comments():
 
 
 @respx.mock
+async def test_get_issue_comments_paginates_across_multiple_pages():
+    route = respx.get(f"https://api.github.com/repos/{OWNER}/{REPO}/issues/128/comments").mock(
+        side_effect=[
+            httpx.Response(200, json=[_comment_json(i) for i in range(1, 101)]),
+            httpx.Response(200, json=[_comment_json(101)]),
+        ]
+    )
+    comments = await _service().get_issue_comments(OWNER, REPO, 128)
+    assert len(comments) == 101
+    assert route.call_count == 2
+
+
+@respx.mock
 async def test_find_linked_pull_request_found():
     timeline_json = [
         {
@@ -143,6 +156,36 @@ async def test_get_pull_request_checks_uses_head_sha():
     checks = await _service().get_pull_request_checks(OWNER, REPO, 5)
     assert len(checks) == 1
     assert checks[0].conclusion == "success"
+
+
+@respx.mock
+async def test_get_pull_request_checks_paginates():
+    respx.get(f"https://api.github.com/repos/{OWNER}/{REPO}/pulls/5").mock(
+        return_value=httpx.Response(200, json=_pull_request_json(5))
+    )
+
+    def _check_run(index):
+        return {
+            "name": f"check-{index}",
+            "status": "completed",
+            "conclusion": "success",
+            "html_url": None,
+            "started_at": None,
+            "completed_at": None,
+        }
+
+    route = respx.get(f"https://api.github.com/repos/{OWNER}/{REPO}/commits/abc123/check-runs").mock(
+        side_effect=[
+            httpx.Response(
+                200,
+                json={"total_count": 101, "check_runs": [_check_run(i) for i in range(100)]},
+            ),
+            httpx.Response(200, json={"total_count": 101, "check_runs": [_check_run(100)]}),
+        ]
+    )
+    checks = await _service().get_pull_request_checks(OWNER, REPO, 5)
+    assert len(checks) == 101
+    assert route.call_count == 2
 
 
 @respx.mock

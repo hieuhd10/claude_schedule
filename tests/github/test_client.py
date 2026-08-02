@@ -74,3 +74,26 @@ async def test_get_timeout_raises_github_timeout(client):
     respx.get("https://api.github.com/repos/o/r").mock(side_effect=httpx.TimeoutException("x"))
     with pytest.raises(GitHubTimeoutError):
         await client.get("/repos/o/r")
+
+
+@respx.mock
+async def test_get_all_pages_stops_after_a_short_page(client):
+    route = respx.get("https://api.github.com/repos/o/r/items").mock(
+        return_value=httpx.Response(200, json=[{"id": 1}])
+    )
+    items = await client.get_all_pages("/repos/o/r/items")
+    assert items == [{"id": 1}]
+    assert route.call_count == 1
+
+
+@respx.mock
+async def test_get_all_pages_aggregates_across_full_pages(client):
+    route = respx.get("https://api.github.com/repos/o/r/items").mock(
+        side_effect=[
+            httpx.Response(200, json=[{"id": i} for i in range(100)]),
+            httpx.Response(200, json=[{"id": 100}]),
+        ]
+    )
+    items = await client.get_all_pages("/repos/o/r/items")
+    assert len(items) == 101
+    assert route.call_count == 2

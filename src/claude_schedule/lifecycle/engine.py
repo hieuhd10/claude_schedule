@@ -4,10 +4,18 @@ from claude_schedule.github.models import CheckRun, Comment, Issue, IssueState, 
 from claude_schedule.lifecycle.models import LifecycleResult, ParsedClaudeResponse, Stage
 from claude_schedule.lifecycle.timeline import parse_claude_response
 
-_REVIEW_PASSED_RE = re.compile(r"\bREVIEW PASSED\b", re.IGNORECASE)
-_REVIEW_FAILED_RE = re.compile(r"\bREVIEW FAILED\b", re.IGNORECASE)
-_TEST_PASSED_RE = re.compile(r"\bTEST PASSED\b", re.IGNORECASE)
-_TEST_FAILED_RE = re.compile(r"\bTEST FAILED\b", re.IGNORECASE)
+
+def _standalone_marker_re(phrase: str) -> re.Pattern[str]:
+    # Requires the marker to occupy its own line (only markdown decoration allowed
+    # alongside it) so a generated @claude prompt that merely mentions the marker
+    # phrase in a sentence isn't mistaken for a posted result.
+    return re.compile(rf"^[\s*_#>-]*{phrase}[\s*_.!-]*$", re.IGNORECASE | re.MULTILINE)
+
+
+_REVIEW_PASSED_RE = _standalone_marker_re("REVIEW PASSED")
+_REVIEW_FAILED_RE = _standalone_marker_re("REVIEW FAILED")
+_TEST_PASSED_RE = _standalone_marker_re("TEST PASSED")
+_TEST_FAILED_RE = _standalone_marker_re("TEST FAILED")
 _DEBUG_APPROVED_RE = re.compile(r"\[LIFECYCLE:DEBUG_APPROVED\]", re.IGNORECASE)
 _HUMAN_COMMAND_RE = re.compile(r"^\s*@claude\b", re.IGNORECASE)
 

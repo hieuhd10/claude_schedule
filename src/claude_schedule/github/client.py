@@ -14,6 +14,12 @@ from claude_schedule.github.errors import (
 
 _GITHUB_API_BASE = "https://api.github.com"
 
+# GitHub caps per_page at 100; the page cap is a safety backstop against
+# runaway loops (e.g. a misbehaving mock or an API change) rather than a
+# realistic ceiling for issue/PR activity.
+_PAGE_SIZE = 100
+_MAX_PAGES = 20
+
 
 class GitHubClient:
     def __init__(self, token: str, timeout_seconds: float) -> None:
@@ -36,8 +42,31 @@ class GitHubClient:
         *,
         not_found_error: type[GitHubError] = RepoNotFoundError,
         headers: dict[str, str] | None = None,
+        params: dict[str, Any] | None = None,
     ) -> Any:
-        return await self._request("GET", path, not_found_error=not_found_error, headers=headers)
+        return await self._request(
+            "GET", path, not_found_error=not_found_error, headers=headers, params=params
+        )
+
+    async def get_all_pages(
+        self,
+        path: str,
+        *,
+        not_found_error: type[GitHubError] = RepoNotFoundError,
+        headers: dict[str, str] | None = None,
+        params: dict[str, Any] | None = None,
+    ) -> list[Any]:
+        """Fetch every page of a list endpoint, stopping once a short page is seen."""
+        items: list[Any] = []
+        for page in range(1, _MAX_PAGES + 1):
+            page_params = {**(params or {}), "per_page": _PAGE_SIZE, "page": page}
+            batch = await self.get(
+                path, not_found_error=not_found_error, headers=headers, params=page_params
+            )
+            items.extend(batch)
+            if len(batch) < _PAGE_SIZE:
+                break
+        return items
 
     async def post(
         self,

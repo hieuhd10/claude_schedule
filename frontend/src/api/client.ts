@@ -49,8 +49,11 @@ export function getIssueDetail(
   owner: string,
   repository: string,
   issueNumber: number,
+  signal?: AbortSignal,
 ): Promise<IssueDetailResponse> {
-  return request<IssueDetailResponse>(`/api/issues/${owner}/${repository}/${issueNumber}`);
+  return request<IssueDetailResponse>(`/api/issues/${owner}/${repository}/${issueNumber}`, {
+    signal,
+  });
 }
 
 export function postIssueComment(
