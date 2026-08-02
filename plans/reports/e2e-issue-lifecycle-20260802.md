@@ -15,6 +15,8 @@ The run exercises both interaction choices exposed by the workspace:
 1. Manual comment written by the operator.
 2. Editable `@claude` comment posted to invoke Claude on GitHub.
 
+Evidence coverage: **23/23 steps have at least one screenshot placed directly in that step.**
+
 ## Evidence and execution log
 
 ### Step 1 — Open the lifecycle workspace
@@ -131,6 +133,10 @@ The run exercises both interaction choices exposed by the workspace:
 
 **Action:** all five were addressed in follow-up commit `b114f6c`. The verification count increased from 62 to 64 backend tests, and two frontend regression tests were added.
 
+**Evidence:** the real PR conversation shows Claude's full review, five findings, the follow-up commit, and the subsequent manual result.
+
+![Claude Review findings on PR #19](images/e2e-issue-lifecycle-20260802/22-github-pr-19-merged.png)
+
 ### Step 15 — Validate malformed manual marker handling
 
 **Choice:** “Manual comment” for the follow-up review result.
@@ -200,6 +206,10 @@ The run exercises both interaction choices exposed by the workspace:
 **Observed:** preserving structured Claude details made a long response expand the entire Completed card. The information was useful, but the default layout was not.
 
 **Action:** reopen Issue #18 once more, move structured details behind an accessible disclosure, constrain the expanded body to a scrollable region, and add a default-collapsed regression test in [PR #21](https://github.com/hieuhd10/claude_schedule/pull/21). Commit `cb9d975`; merge commit `896ea052`.
+
+**Evidence:** the pre-disclosure Completed screenshot shows the structured Claude response stretching the workspace vertically; this screenshot directly triggered the layout follow-up.
+
+![Long Claude response before disclosure optimization](images/e2e-issue-lifecycle-20260802/24-final-completed-state-verified.png)
 
 ### Step 23 — Final visual acceptance
 
