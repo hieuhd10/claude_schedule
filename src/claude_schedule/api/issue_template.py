@@ -10,10 +10,10 @@ def build_bug_report_body(request: CreateIssueRequest) -> str:
         request.steps_to_reproduce,
         "",
         "## Expected Result",
-        request.expected_result,
+        request.actual_result,
         "",
         "## Actual Result",
-        request.actual_result,
+        request.expected_result,
     ]
     if request.additional_notes:
         sections += ["", "## Additional Notes", request.additional_notes]
