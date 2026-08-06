@@ -31,6 +31,24 @@ def test_build_bug_report_body_includes_all_sections():
     assert "Sky is blue" in body
 
 
+def test_build_bug_report_body_pairs_each_value_with_its_own_heading():
+    # Guards against the Expected/Actual sections silently swapping: each
+    # value must sit directly under its own heading, not just appear
+    # somewhere in the body.
+    body = build_bug_report_body(_request())
+    expected_heading_index = body.index("## Expected Result")
+    expected_value_index = body.index("Sky should be transparent")
+    actual_heading_index = body.index("## Actual Result")
+    actual_value_index = body.index("Sky is blue")
+
+    assert (
+        expected_heading_index
+        < expected_value_index
+        < actual_heading_index
+        < actual_value_index
+    )
+
+
 def test_build_bug_report_body_omits_additional_notes_when_absent():
     body = build_bug_report_body(_request(additional_notes=None))
     assert "Additional Notes" not in body
