@@ -7,6 +7,7 @@ from claude_schedule.github.errors import (
     GitHubError,
     GitHubTimeoutError,
     IssueNotFoundError,
+    MergeNotAllowedError,
     PrivateOrNoScopeError,
     PullRequestNotFoundError,
     RateLimitedError,
@@ -25,6 +26,7 @@ _ERROR_STATUS_AND_CODE: dict[type[GitHubError], tuple[int, str]] = {
     PrivateOrNoScopeError: (403, "PRIVATE_OR_NO_SCOPE"),
     RateLimitedError: (429, "RATE_LIMITED"),
     CommentRejectedError: (422, "COMMENT_REJECTED"),
+    MergeNotAllowedError: (409, "MERGE_NOT_ALLOWED"),
     GitHubTimeoutError: (504, "GITHUB_TIMEOUT"),
 }
 

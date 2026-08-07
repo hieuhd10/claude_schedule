@@ -6,25 +6,47 @@ from claude_schedule.api.deps import ensure_repository_allowed, get_github_servi
 from claude_schedule.api.issue_template import build_bug_report_body, build_labels_from_metadata
 from claude_schedule.api.schemas import (
     CheckpointRequest,
+    CloseIssueResponse,
     CommentResponse,
     ConfigResponse,
+    LABEL_PREFIXES,
     CreateIssueRequest,
     CreateIssueResponse,
+    CreatePullRequestRequest,
+    CreatePullRequestResponse,
+    FixBranchesResponse,
     IssueDetailResponse,
+    MergePullRequestRequest,
+    MergePullRequestResponse,
     ParseUrlRequest,
     ParseUrlResponse,
     PostCommentRequest,
 )
-from claude_schedule.github.errors import PullRequestNotFoundError
 from claude_schedule.github.models import CheckRun, Comment, Commit
 from claude_schedule.github.service import GitHubService
 from claude_schedule.github.url_parser import parse_issue_url
 from claude_schedule.lifecycle.engine import infer_stage
-from claude_schedule.lifecycle.models import CHECKPOINT_TARGET, build_checkpoint_comment
+from claude_schedule.lifecycle.models import build_checkpoint_comment
 from claude_schedule.lifecycle.timeline import merge_and_categorize
 from claude_schedule.settings import Settings, get_settings
 
 router = APIRouter(prefix="/api")
+
+
+def _base_branch_from_labels(labels: list[str]) -> str | None:
+    prefix = LABEL_PREFIXES["base_branch"]
+    for label in labels:
+        if label.startswith(prefix):
+            return label[len(prefix) :] or None
+    return None
+
+
+def _rank_fix_branches(branches: list[str], issue_number: int, base_branch: str) -> list[str]:
+    """Branches naming this issue first - that is what the Claude workflow pushes."""
+    marker = f"issue-{issue_number}"
+    named = [name for name in branches if marker in name]
+    others = [name for name in branches if marker not in name and name != base_branch]
+    return named + others
 
 
 @router.post("/issues/parse-url", response_model=ParseUrlResponse)
@@ -78,8 +100,9 @@ async def get_issue_detail(
     pr_commits: list[Commit] = []
     pr_checks: list[CheckRun] = []
     if linked_pull_request is not None:
-        pr_comments, pr_commits, pr_checks = await asyncio.gather(
+        conversation, reviews, pr_commits, pr_checks = await asyncio.gather(
             service.get_pull_request_comments(owner, repository, linked_pull_request.number),
+            service.get_pull_request_reviews(owner, repository, linked_pull_request.number),
             service.get_pull_request_commits(owner, repository, linked_pull_request.number),
             service.get_pull_request_checks(
                 owner,
@@ -88,6 +111,9 @@ async def get_issue_detail(
                 head_sha=linked_pull_request.head_sha,
             ),
         )
+        # Reviews and conversation comments are one record of what was said on the
+        # Pull Request; result markers count from either.
+        pr_comments = sorted(conversation + reviews, key=lambda comment: comment.created_at)
 
     lifecycle = infer_stage(
         issue=issue,
@@ -159,14 +185,100 @@ async def post_checkpoint(
 ) -> CommentResponse:
     ensure_repository_allowed(owner, repository, settings)
     body = build_checkpoint_comment(payload.checkpoint, settings.operator_github_username)
-    target = CHECKPOINT_TARGET[payload.checkpoint]
-
-    if target == "issue":
-        comment = await service.post_issue_comment(owner, repository, issue_number, body)
-    else:
-        linked_pull_request = await service.find_linked_pull_request(owner, repository, issue_number)
-        if linked_pull_request is None:
-            raise PullRequestNotFoundError("No linked Pull Request found to post this checkpoint to")
-        comment = await service.post_pull_request_comment(owner, repository, linked_pull_request.number, body)
-
+    comment = await service.post_issue_comment(owner, repository, issue_number, body)
     return CommentResponse(comment=comment)
+
+
+@router.get(
+    "/issues/{owner}/{repository}/{issue_number}/fix-branches",
+    response_model=FixBranchesResponse,
+)
+async def get_fix_branches(
+    owner: str,
+    repository: str,
+    issue_number: int,
+    service: GitHubService = Depends(get_github_service),
+    settings: Settings = Depends(get_settings),
+) -> FixBranchesResponse:
+    """Branches that could carry the fix, plus the branch a Pull Request would target."""
+    ensure_repository_allowed(owner, repository, settings)
+    issue, default_branch, branches = await asyncio.gather(
+        service.get_issue(owner, repository, issue_number),
+        service.get_default_branch(owner, repository),
+        service.list_branches(owner, repository),
+    )
+    base_branch = _base_branch_from_labels(issue.labels) or default_branch
+    return FixBranchesResponse(
+        base_branch=base_branch,
+        branches=_rank_fix_branches(branches, issue_number, base_branch),
+    )
+
+
+@router.post(
+    "/issues/{owner}/{repository}/{issue_number}/pull-request",
+    response_model=CreatePullRequestResponse,
+)
+async def create_pull_request(
+    owner: str,
+    repository: str,
+    issue_number: int,
+    payload: CreatePullRequestRequest,
+    service: GitHubService = Depends(get_github_service),
+    settings: Settings = Depends(get_settings),
+) -> CreatePullRequestResponse:
+    ensure_repository_allowed(owner, repository, settings)
+    issue = await service.get_issue(owner, repository, issue_number)
+    base = payload.base or _base_branch_from_labels(issue.labels)
+    if not base:
+        base = await service.get_default_branch(owner, repository)
+    title = payload.title or f"Fix #{issue_number}: {issue.title}"
+    # The closing keyword is what links the Pull Request back to the issue, and that
+    # link is how the lifecycle finds it. Without it the flow would stay on Fix.
+    pull_request = await service.create_pull_request(
+        owner,
+        repository,
+        title=title[:256],
+        head=payload.head,
+        base=base,
+        body=f"Closes #{issue_number}",
+    )
+    return CreatePullRequestResponse(pull_request=pull_request)
+
+
+@router.post(
+    "/pull-requests/{owner}/{repository}/{pr_number}/merge",
+    response_model=MergePullRequestResponse,
+)
+async def merge_pull_request(
+    owner: str,
+    repository: str,
+    pr_number: int,
+    payload: MergePullRequestRequest,
+    service: GitHubService = Depends(get_github_service),
+    settings: Settings = Depends(get_settings),
+) -> MergePullRequestResponse:
+    ensure_repository_allowed(owner, repository, settings)
+    pull_request = await service.merge_pull_request(
+        owner,
+        repository,
+        pr_number,
+        merge_method=payload.merge_method.value,
+    )
+    return MergePullRequestResponse(pull_request=pull_request)
+
+
+@router.post("/issues/{owner}/{repository}/{issue_number}/close", response_model=CloseIssueResponse)
+async def close_issue(
+    owner: str,
+    repository: str,
+    issue_number: int,
+    service: GitHubService = Depends(get_github_service),
+    settings: Settings = Depends(get_settings),
+) -> CloseIssueResponse:
+    """
+    Closing is what moves the flow to Completed. A merge with a closing keyword
+    does it on its own, so this covers the Pull Requests that carry no keyword.
+    """
+    ensure_repository_allowed(owner, repository, settings)
+    issue = await service.close_issue(owner, repository, issue_number)
+    return CloseIssueResponse(issue=issue)

@@ -37,6 +37,43 @@ def test_parse_claude_response_unstructured():
     assert parsed.findings == []
 
 
+def test_parse_claude_response_accepts_markdown_and_bold_headings():
+    body = "## Root Cause\nRace in the refresh handler.\n\n**Findings:**\n- missing guard\n"
+    parsed = parse_claude_response(body)
+    assert parsed.root_cause == "Race in the refresh handler."
+    assert parsed.findings == ["missing guard"]
+
+
+def test_parse_claude_response_reads_content_written_on_the_heading_line():
+    parsed = parse_claude_response("### Finding: the swap does not exist on this branch")
+    assert parsed.findings == ["the swap does not exist on this branch"]
+
+
+def test_parse_claude_response_section_ends_at_the_next_heading():
+    body = "## Root Cause\nRace in the refresh handler.\n\n## Conclusion\nShipping a follow-up.\n"
+    parsed = parse_claude_response(body)
+    assert parsed.root_cause == "Race in the refresh handler."
+
+
+def test_parse_claude_response_keeps_prose_inside_its_section():
+    # A plain sentence is not a heading, so it must not cut the section short.
+    body = "## Root Cause\nThe timer resets late.\nThat leaves a 400ms window.\n"
+    parsed = parse_claude_response(body)
+    assert parsed.root_cause == "The timer resets late.\nThat leaves a 400ms window."
+
+
+def test_parse_claude_response_ignores_headings_inside_code_blocks():
+    body = "## Root Cause\nSee below.\n\n```python\n# Findings: not a heading\nvalue = 1\n```\n"
+    parsed = parse_claude_response(body)
+    assert parsed.findings == []
+    assert "value = 1" in (parsed.root_cause or "")
+
+
+def test_parse_claude_response_carries_the_comment_permalink():
+    parsed = parse_claude_response("Root Cause:\nbad state", html_url="https://gh.test/c/1")
+    assert parsed.html_url == "https://gh.test/c/1"
+
+
 def test_merge_and_categorize_sorted_and_categorized():
     issue_comments = [
         _comment(1, "@claude debug this", "hieuhd10", 1),

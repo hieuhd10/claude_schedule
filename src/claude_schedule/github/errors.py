@@ -36,5 +36,9 @@ class CommentRejectedError(GitHubError):
     pass
 
 
+class MergeNotAllowedError(GitHubError):
+    """GitHub refused the merge: conflicts, a failing branch protection rule, or an out-of-date head."""
+
+
 class GitHubTimeoutError(GitHubError):
     pass

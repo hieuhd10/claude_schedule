@@ -14,42 +14,42 @@ class Stage(str, Enum):
 
 class Checkpoint(str, Enum):
     DEBUG_APPROVED = "DEBUG_APPROVED"
-    PR_READY_FOR_REVIEW = "PR_READY_FOR_REVIEW"
-    REVIEW_CONFIRMED = "REVIEW_CONFIRMED"
-    TEST_CONFIRMED = "TEST_CONFIRMED"
-    PR_MERGED = "PR_MERGED"
-
-
-# Which real GitHub thread a checkpoint marker comment gets posted to.
-CHECKPOINT_TARGET: dict[Checkpoint, str] = {
-    Checkpoint.DEBUG_APPROVED: "issue",
-    Checkpoint.PR_READY_FOR_REVIEW: "pull_request",
-    Checkpoint.REVIEW_CONFIRMED: "pull_request",
-    Checkpoint.TEST_CONFIRMED: "pull_request",
-    Checkpoint.PR_MERGED: "pull_request",
-}
-
-CHECKPOINT_DESCRIPTIONS: dict[Checkpoint, str] = {
-    Checkpoint.DEBUG_APPROVED: "Debug result has been reviewed and accepted",
-    Checkpoint.PR_READY_FOR_REVIEW: "Pull Request has been marked ready for review",
-    Checkpoint.REVIEW_CONFIRMED: "Review result has been confirmed",
-    Checkpoint.TEST_CONFIRMED: "Test result has been confirmed",
-    Checkpoint.PR_MERGED: "Pull Request merge has been confirmed",
-}
 
 
 def build_checkpoint_comment(checkpoint: Checkpoint, username: str) -> str:
-    description = CHECKPOINT_DESCRIPTIONS[checkpoint]
     actor = f"@{username.strip()}" if username.strip() else "the operator"
-    return f"[LIFECYCLE:{checkpoint.value}]\n\n{description} by {actor}."
+    return f"[LIFECYCLE:{checkpoint.value}]\n\nDebug result has been reviewed and accepted by {actor}."
 
 
 class ParsedClaudeResponse(BaseModel):
     raw_body: str
     is_structured: bool
     root_cause: str | None = None
+    solution: str | None = None
     findings: list[str] = []
     test_result: str | None = None
+    remaining_risk: str | None = None
+    summary: str | None = None
+    html_url: str | None = None
+
+
+class StageReport(BaseModel):
+    """The latest Claude report that belongs to one stage of the flow."""
+
+    stage: Stage
+    actor: str | None = None
+    recorded_at: str | None = None  # ISO 8601 string, kept as-is from the underlying model
+    response: ParsedClaudeResponse
+
+
+class StageOwner(BaseModel):
+    """Who produced the record that a stage is based on."""
+
+    stage: Stage
+    actor: str | None = None
+    role: str
+    recorded_at: str | None = None  # ISO 8601 string, kept as-is from the underlying model
+    source_url: str | None = None
 
 
 class LifecycleResult(BaseModel):
@@ -59,7 +59,14 @@ class LifecycleResult(BaseModel):
     last_claude_response: ParsedClaudeResponse | None
     next_recommended_action: str
     review_findings: list[str] = []
+    review_result: str | None = None
     test_result: str | None = None
+    # The signals the stage was inferred from, published so the UI states the same
+    # conditions the engine gated on instead of recomputing them from raw data.
+    debug_approved: bool = False
+    checks_green: bool = False
+    stage_owners: list[StageOwner] = []
+    stage_reports: list[StageReport] = []
 
 
 class ActivityCategory(str, Enum):

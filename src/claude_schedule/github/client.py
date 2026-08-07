@@ -6,6 +6,7 @@ from claude_schedule.github.errors import (
     CommentRejectedError,
     GitHubError,
     GitHubTimeoutError,
+    MergeNotAllowedError,
     PrivateOrNoScopeError,
     RateLimitedError,
     RepoNotFoundError,
@@ -80,6 +81,24 @@ class GitHubClient:
     ) -> Any:
         return await self._request("POST", path, not_found_error=not_found_error, json=json)
 
+    async def patch(
+        self,
+        path: str,
+        *,
+        json: dict,
+        not_found_error: type[GitHubError] = RepoNotFoundError,
+    ) -> Any:
+        return await self._request("PATCH", path, not_found_error=not_found_error, json=json)
+
+    async def put(
+        self,
+        path: str,
+        *,
+        json: dict,
+        not_found_error: type[GitHubError] = RepoNotFoundError,
+    ) -> Any:
+        return await self._request("PUT", path, not_found_error=not_found_error, json=json)
+
     async def _request(
         self,
         method: str,
@@ -122,6 +141,11 @@ class GitHubClient:
             )
         if response.status_code == 404:
             raise not_found_error("The requested GitHub resource was not found")
+        # A merge GitHub will not perform: 405 for an unmergeable Pull Request,
+        # 409 when the head moved on. Both are the operator's to resolve, not a bug.
+        if response.status_code in (405, 409):
+            message = response.json().get("message", "GitHub refused the merge")
+            raise MergeNotAllowedError(message)
         if response.status_code == 422:
             message = response.json().get("message", "GitHub rejected the request")
             raise CommentRejectedError(message)

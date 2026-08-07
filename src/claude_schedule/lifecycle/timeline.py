@@ -3,12 +3,49 @@ import re
 from claude_schedule.github.models import CheckRun, Comment, Commit, PullRequest, TimelineEvent
 from claude_schedule.lifecycle.models import ActivityCategory, ActivityItem, ParsedClaudeResponse
 
+# One shared vocabulary across every stage of the flow: a comment declares which
+# stage it reports on by the sections it carries, so nothing has to be guessed
+# from the order comments arrive in.
 _FIELD_HEADINGS = {
-    "root_cause": {"root cause"},
-    "findings": {"finding", "findings"},
-    "test_result": {"test result", "test results"},
+    "root cause": "root_cause",
+    "root causes": "root_cause",
+    "solution": "solution",
+    "implemented solution": "solution",
+    "finding": "findings",
+    "findings": "findings",
+    "key findings": "findings",
+    "test result": "test_result",
+    "test results": "test_result",
+    "remaining risk": "remaining_risk",
+    "remaining risks": "remaining_risk",
+    "summary": "summary",
 }
-_HEADING_LINE_RE = re.compile(r"^[#*\s]*([A-Za-z][A-Za-z ]*?)[:*]*\s*$")
+
+_MD_HEADING_RE = re.compile(r"^#{1,6}\s")
+_DECORATION_RE = re.compile(r"^#{1,6}\s*|\*\*")
+_NAME_RE = re.compile(r"^(?P<name>[A-Za-z][A-Za-z ]*?)\s*(?::\s*(?P<inline>.*))?$")
+_CODE_FENCE_RE = re.compile(r"^\s*```")
+
+
+def _match_heading(line: str) -> tuple[str, str] | None:
+    """
+    Heading name (lower-cased) and any content written on the same line.
+
+    A line only counts as a heading when it is marked up as one - a markdown
+    heading, a bold label, or a name followed by a colon. Plain prose must never
+    match, or a section would be cut short by its own first sentence.
+    """
+    stripped = line.strip()
+    plain = _DECORATION_RE.sub("", stripped).strip()
+    match = _NAME_RE.match(plain)
+    if not match:
+        return None
+
+    is_marked_up = bool(_MD_HEADING_RE.match(stripped)) or stripped.startswith("**") or ":" in plain
+    if not is_marked_up:
+        return None
+
+    return match.group("name").strip().lower(), (match.group("inline") or "").strip()
 
 # Timeline event types that duplicate data already surfaced via comments/commits
 # elsewhere in the merged activity feed.
@@ -17,44 +54,53 @@ _SKIPPED_TIMELINE_EVENTS = {"commented", "committed", "line-commented", "mention
 _SUMMARY_LIMIT = 140
 
 
-def parse_claude_response(body: str) -> ParsedClaudeResponse:
+def parse_claude_response(body: str, html_url: str | None = None) -> ParsedClaudeResponse:
     sections: dict[str, list[str]] = {}
     current_field: str | None = None
+    in_code_block = False
 
     for line in body.splitlines():
-        heading_match = _HEADING_LINE_RE.match(line.strip())
-        matched_field = None
-        if heading_match:
-            heading_text = heading_match.group(1).strip().lower()
-            for field, aliases in _FIELD_HEADINGS.items():
-                if heading_text in aliases:
-                    matched_field = field
-                    break
-        if matched_field:
-            current_field = matched_field
-            sections.setdefault(current_field, [])
-            continue
+        if _CODE_FENCE_RE.match(line):
+            in_code_block = not in_code_block
+        elif not in_code_block:
+            heading = _match_heading(line)
+            if heading is not None:
+                name, inline = heading
+                # An unrecognized heading still ends the section it follows,
+                # otherwise the rest of the comment lands in the previous field.
+                current_field = _FIELD_HEADINGS.get(name)
+                if current_field is not None:
+                    bucket = sections.setdefault(current_field, [])
+                    if inline:
+                        bucket.append(inline)
+                continue
+
         if current_field:
             sections[current_field].append(line)
 
     if not sections:
-        return ParsedClaudeResponse(raw_body=body, is_structured=False)
+        return ParsedClaudeResponse(raw_body=body, is_structured=False, html_url=html_url)
 
-    root_cause = "\n".join(sections.get("root_cause", [])).strip() or None
-    findings_text = "\n".join(sections.get("findings", [])).strip()
+    def text(field: str) -> str | None:
+        return "\n".join(sections.get(field, [])).strip() or None
+
+    findings_text = text("findings")
     findings = (
-        [item.strip("- ").strip() for item in findings_text.splitlines() if item.strip()]
+        [item.strip("-*• ").strip() for item in findings_text.splitlines() if item.strip()]
         if findings_text
         else []
     )
-    test_result = "\n".join(sections.get("test_result", [])).strip() or None
 
     return ParsedClaudeResponse(
         raw_body=body,
         is_structured=True,
-        root_cause=root_cause,
+        root_cause=text("root_cause"),
+        solution=text("solution"),
         findings=findings,
-        test_result=test_result,
+        test_result=text("test_result"),
+        remaining_risk=text("remaining_risk"),
+        summary=text("summary"),
+        html_url=html_url,
     )
 
 

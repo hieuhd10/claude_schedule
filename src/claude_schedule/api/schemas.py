@@ -1,3 +1,5 @@
+from enum import Enum
+
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
 from claude_schedule.github.models import CheckRun, Comment, Commit, Issue, PullRequest
@@ -109,4 +111,39 @@ class CreateIssueRequest(BaseModel):
 
 
 class CreateIssueResponse(BaseModel):
+    issue: Issue
+
+
+class FixBranchesResponse(BaseModel):
+    """Branch candidates for the Pull Request that hands Fix over to Review."""
+
+    base_branch: str
+    branches: list[str]
+
+
+class CreatePullRequestRequest(BaseModel):
+    head: str = Field(min_length=1, max_length=255)
+    base: str | None = Field(default=None, max_length=255)
+    title: str | None = Field(default=None, max_length=256)
+
+
+class CreatePullRequestResponse(BaseModel):
+    pull_request: PullRequest
+
+
+class MergeMethod(str, Enum):
+    MERGE = "merge"
+    SQUASH = "squash"
+    REBASE = "rebase"
+
+
+class MergePullRequestRequest(BaseModel):
+    merge_method: MergeMethod = MergeMethod.SQUASH
+
+
+class MergePullRequestResponse(BaseModel):
+    pull_request: PullRequest
+
+
+class CloseIssueResponse(BaseModel):
     issue: Issue

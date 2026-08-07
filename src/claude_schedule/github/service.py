@@ -58,6 +58,19 @@ def _map_comment(raw: dict) -> Comment:
     )
 
 
+def _map_review(raw: dict) -> Comment:
+    """A submitted review carries a submission time only, so it stands in for both timestamps."""
+    submitted_at = _parse_required_datetime(raw["submitted_at"])
+    return Comment(
+        id=raw["id"],
+        body=raw.get("body") or "",
+        author=raw["user"]["login"],
+        created_at=submitted_at,
+        updated_at=submitted_at,
+        html_url=raw["html_url"],
+    )
+
+
 def _map_pull_request(raw: dict) -> PullRequest:
     return PullRequest(
         number=raw["number"],
@@ -152,6 +165,62 @@ class GitHubService:
         )
         return _map_issue(raw)
 
+    async def get_default_branch(self, owner: str, repository: str) -> str:
+        raw = await self._client.get(
+            f"/repos/{owner}/{repository}",
+            not_found_error=RepoNotFoundError,
+        )
+        return raw["default_branch"]
+
+    async def list_branches(self, owner: str, repository: str) -> list[str]:
+        raw = await self._client.get_paginated(
+            f"/repos/{owner}/{repository}/branches",
+            not_found_error=RepoNotFoundError,
+        )
+        return [item["name"] for item in raw]
+
+    async def create_pull_request(
+        self,
+        owner: str,
+        repository: str,
+        title: str,
+        head: str,
+        base: str,
+        body: str,
+    ) -> PullRequest:
+        raw = await self._client.post(
+            f"/repos/{owner}/{repository}/pulls",
+            json={"title": title, "head": head, "base": base, "body": body},
+            not_found_error=RepoNotFoundError,
+        )
+        return _map_pull_request(raw)
+
+    async def close_issue(self, owner: str, repository: str, issue_number: int) -> Issue:
+        raw = await self._client.patch(
+            f"/repos/{owner}/{repository}/issues/{issue_number}",
+            json={"state": "closed", "state_reason": "completed"},
+            not_found_error=IssueNotFoundError,
+        )
+        return _map_issue(raw)
+
+    async def merge_pull_request(
+        self,
+        owner: str,
+        repository: str,
+        pr_number: int,
+        merge_method: str,
+    ) -> PullRequest:
+        """
+        Merge, then read the Pull Request back. The merge response carries only the
+        resulting commit, and the caller needs the merged Pull Request itself.
+        """
+        await self._client.put(
+            f"/repos/{owner}/{repository}/pulls/{pr_number}/merge",
+            json={"merge_method": merge_method},
+            not_found_error=PullRequestNotFoundError,
+        )
+        return await self.get_pull_request(owner, repository, pr_number)
+
     async def get_issue_comments(self, owner: str, repository: str, issue_number: int) -> list[Comment]:
         raw = await self._client.get_paginated(
             f"/repos/{owner}/{repository}/issues/{issue_number}/comments",
@@ -212,6 +281,26 @@ class GitHubService:
             not_found_error=PullRequestNotFoundError,
         )
         return [_map_comment(item) for item in raw]
+
+    async def get_pull_request_reviews(
+        self, owner: str, repository: str, pr_number: int
+    ) -> list[Comment]:
+        """
+        Submitted reviews, read as comments because that is what they are to the
+        lifecycle: a REVIEW PASSED written through the GitHub review UI has to
+        count the same as one written in a plain comment.
+        """
+        raw = await self._client.get_paginated(
+            f"/repos/{owner}/{repository}/pulls/{pr_number}/reviews",
+            not_found_error=PullRequestNotFoundError,
+        )
+        reviews = []
+        for item in raw:
+            # A review still being drafted has no submission time and no verdict yet.
+            if not item.get("submitted_at") or not (item.get("body") or "").strip():
+                continue
+            reviews.append(_map_review(item))
+        return reviews
 
     async def get_pull_request_commits(
         self, owner: str, repository: str, pr_number: int
