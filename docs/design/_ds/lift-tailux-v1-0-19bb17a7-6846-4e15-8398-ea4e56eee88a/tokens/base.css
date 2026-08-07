@@ -1,0 +1,43 @@
+/* Base document styles. Body is 14px/20px Inter 400 in gray-700 on gray-50 —
+   the whole system is calibrated to that, not to a 16px web default. */
+html { height: 100%; -webkit-tap-highlight-color: transparent; text-rendering: optimizeLegibility }
+body {
+  margin: 0;
+  min-height: 100%;
+  background-color: var(--bg-page);
+  color: var(--text-body);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 1.25rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+*, ::before, ::after { box-sizing: border-box; border-color: var(--border-subtle) }
+h1, h2, h3, h4, h5, h6 { margin: 0; font-weight: var(--font-weight-medium); color: var(--text-heading) }
+p { margin: 0 }
+a { color: var(--text-link); text-decoration: none; transition: color var(--duration-base) var(--ease-in-out) }
+a:hover { color: var(--text-link-hover) }
+img, svg { display: block; max-width: 100% }
+button { font: inherit; color: inherit }
+
+/* Type roles, applied as classes */
+.t-display { font-size: var(--text-3xl); line-height: var(--text-3xl--line-height); font-weight: var(--font-weight-semibold); color: var(--text-strong); letter-spacing: var(--tracking-tight) }
+.t-page-title { font-size: var(--text-2xl); line-height: var(--text-2xl--line-height); font-weight: var(--font-weight-semibold); color: var(--text-heading) }
+.t-card-title { font-size: var(--text-base); line-height: var(--text-base--line-height); font-weight: var(--font-weight-medium); letter-spacing: var(--tracking-wide); color: var(--text-heading) }
+.t-metric { font-size: var(--text-xl); line-height: var(--text-xl--line-height); font-weight: var(--font-weight-semibold); color: var(--text-heading) }
+.t-body { font-size: var(--text-sm); line-height: 1.25rem; color: var(--text-body) }
+.t-body-plus { font-size: var(--text-sm-plus); line-height: var(--text-sm-plus--line-height); color: var(--text-body) }
+.t-label { font-size: var(--text-xs-plus); line-height: var(--text-xs-plus--line-height); color: var(--text-body) }
+.t-caption { font-size: var(--text-xs); line-height: var(--text-xs--line-height); color: var(--text-subtle) }
+.t-tiny { font-size: var(--text-tiny-plus); line-height: var(--text-tiny-plus--line-height); color: var(--text-subtle) }
+.t-overline { font-size: var(--text-tiny); line-height: var(--text-tiny--line-height); text-transform: uppercase; letter-spacing: var(--tracking-wider); font-weight: var(--font-weight-medium); color: var(--text-subtle) }
+
+/* Chrome utilities carried over from the template */
+.transition-content { transition-property: width, padding-left, padding-right, margin-left, margin-right; transition-duration: var(--duration-content); transition-timing-function: var(--ease-in) }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none }
+.hide-scrollbar::-webkit-scrollbar { display: none }
+.custom-scrollbar { --scrollbar-size: 0.25rem }
+.custom-scrollbar::-webkit-scrollbar { width: var(--scrollbar-size); height: var(--scrollbar-size) }
+.custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgb(211 206 204 / 0.9); border-radius: var(--radius-full) }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: var(--color-gray-400) }
+.dark .custom-scrollbar::-webkit-scrollbar-thumb { background-color: var(--color-dark-400) }

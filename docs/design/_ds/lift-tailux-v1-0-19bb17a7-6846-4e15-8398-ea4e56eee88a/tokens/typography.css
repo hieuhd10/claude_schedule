@@ -1,0 +1,56 @@
+/* One family, one axis of expression: weight. Tailux never mixes typefaces.
+   The size ramp is Tailwind's, plus four Tailux "-plus" half-steps that exist
+   specifically for dense dashboard chrome. */
+:root {
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+  --text-tiny: 0.625rem;          /* 10px */
+  --text-tiny--line-height: 0.8125rem;
+  --text-tiny-plus: 0.6875rem;    /* 11px */
+  --text-tiny-plus--line-height: 0.875rem;
+  --text-xs: 0.75rem;             /* 12px */
+  --text-xs--line-height: 1rem;
+  --text-xs-plus: 0.8125rem;      /* 13px */
+  --text-xs-plus--line-height: 1.125rem;
+  --text-sm: 0.875rem;            /* 14px — body default */
+  --text-sm--line-height: 1.25rem;
+  --text-sm-plus: 0.9375rem;      /* 15px */
+  --text-sm-plus--line-height: 1.375rem;
+  --text-base: 1rem;              /* 16px */
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;            /* 18px */
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;             /* 20px */
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;             /* 24px */
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 1.875rem;           /* 30px */
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl: 2.25rem;            /* 36px */
+  --text-4xl--line-height: 2.5rem;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+
+  /* Semantic type roles */
+  --font-body: var(--font-sans);
+  --font-heading: var(--font-sans);
+  --text-body-size: var(--text-sm);
+  --text-body-leading: 1.25rem;
+  --text-label-size: var(--text-xs-plus);
+  --text-metric-size: var(--text-xl);
+  --text-caption-size: var(--text-xs);
+}

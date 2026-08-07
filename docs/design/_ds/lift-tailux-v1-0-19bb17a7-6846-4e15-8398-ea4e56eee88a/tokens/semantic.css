@@ -1,0 +1,63 @@
+/* Semantic aliases — this is the layer product code should reach for.
+   Light theme values live here; `.dark` overrides them in themes.css. */
+:root {
+  /* Page + surfaces */
+  --bg-page: var(--color-gray-50);
+  --surface-card: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: var(--color-gray-100);
+  --surface-inset: var(--color-gray-150);
+  --surface-header: rgb(255 255 255 / 0.8);
+  --surface-sidebar: #ffffff;
+  --surface-popover: #ffffff;
+  --surface-overlay: rgb(46 43 42 / 0.45);
+
+  /* Foreground */
+  --text-strong: var(--color-gray-900);
+  --text-heading: var(--color-gray-800);
+  --text-body: var(--color-gray-700);
+  --text-muted: var(--color-gray-600);
+  --text-subtle: var(--color-gray-400);
+  --text-on-accent: #ffffff;
+  --text-link: var(--color-primary-600);
+  --text-link-hover: var(--color-primary-800);
+
+  /* Borders + dividers */
+  --border-subtle: var(--color-gray-200);
+  --border-default: var(--color-gray-300);
+  --border-strong: var(--color-gray-400);
+  --border-focus: var(--color-primary-600);
+  --divider: var(--color-gray-200);
+
+  /* Accent surfaces (soft variants) */
+  --accent-solid: var(--color-primary-600);
+  --accent-solid-hover: var(--color-primary-700);
+  --accent-soft: color-mix(in srgb, var(--color-primary-600) 9%, transparent);
+  --accent-soft-hover: color-mix(in srgb, var(--color-primary-600) 16%, transparent);
+  --accent-text: var(--color-primary-600);
+
+  /* Status text — the readable step of each accent in light mode */
+  --text-success: var(--color-success-darker);
+  --text-warning: var(--color-warning-darker);
+  --text-error: var(--color-error);
+  --text-info: var(--color-info-darker);
+
+  /* Selection-control glyphs. Declared here so the checkbox/radio states can
+     reference a token instead of redeclaring a custom property per state. */
+  --glyph-check: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e"); /* @kind other */
+  --glyph-dash: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.0625 7H3.9375C3.41973 7 3 7.44772 3 8C3 8.55228 3.41973 9 3.9375 9H12.0625C12.5803 9 13 8.55228 13 8C13 7.44772 12.5803 7 12.0625 7Z' fill='white'/%3E%3C/svg%3E"); /* @kind other */
+  --glyph-dot: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3.5'/%3e%3c/svg%3e"); /* @kind other */
+  --glyph-dot-sm: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='1' fill='%23fff'/%3E%3C/svg%3E"); /* @kind other */
+
+  /* Skeleton sheen */
+  --sk-color: rgb(255 255 255 / 0.65);
+
+  /* Control geometry */
+  --control-height-sm: 2rem;      /* 32 */
+  --control-height-md: 2.25rem;   /* 36 */
+  --control-height-lg: 2.5rem;    /* 40 */
+  --control-padding-x: 1.25rem;
+  --control-padding-y: 0.5rem;
+  --field-padding-x: 0.75rem;
+  --field-padding-y: 0.5rem;
+}

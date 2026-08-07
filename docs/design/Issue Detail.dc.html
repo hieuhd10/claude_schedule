@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<script src="./ds-base.js"></script>
+<style>body{margin:0;background:var(--bg-page)}a{color:var(--text-link);text-decoration:none}a:hover{color:var(--text-link-hover)}</style>
+</helmet>
+<div ref="{{ rootRef }}" style="min-height:100vh;background:var(--bg-page);font-family:var(--font-sans);color:var(--text-body);font-size:0.875rem;-webkit-font-smoothing:antialiased">
+
+<header style="position:sticky;top:0;z-index:30;height:65px;display:flex;align-items:center;gap:2rem;padding:0 2rem;background:var(--surface-header);backdrop-filter:blur(4px) saturate(150%);border-bottom:1px solid var(--border-subtle)">
+  <div style="display:flex;align-items:center;gap:0.625rem;flex-shrink:0">
+    <img src="assets/lift-mark.svg" alt="LiftOne" style="width:2rem;height:2rem;display:block">
+    <span style="font-size:0.9375rem;font-weight:600;letter-spacing:0.025em;color:var(--text-heading)">LiftOne</span>
+  </div>
+  <nav style="display:flex;align-items:center;gap:0.25rem">
+    <a href="#" style="padding:0.4375rem 0.75rem;border-radius:0.5rem;font-size:0.8125rem;font-weight:500;color:var(--text-muted)" style-hover="background:var(--surface-sunken)">Dashboard</a>
+    <a href="#" style="padding:0.4375rem 0.75rem;border-radius:0.5rem;font-size:0.8125rem;font-weight:600;color:var(--color-primary-700);background:var(--accent-soft)">Issues</a>
+    <a href="#" style="padding:0.4375rem 0.75rem;border-radius:0.5rem;font-size:0.8125rem;font-weight:500;color:var(--text-muted)" style-hover="background:var(--surface-sunken)">Projects</a>
+    <a href="#" style="padding:0.4375rem 0.75rem;border-radius:0.5rem;font-size:0.8125rem;font-weight:500;color:var(--text-muted)" style-hover="background:var(--surface-sunken)">Team</a>
+    <a href="#" style="padding:0.4375rem 0.75rem;border-radius:0.5rem;font-size:0.8125rem;font-weight:500;color:var(--text-muted)" style-hover="background:var(--surface-sunken)">Reports</a>
+  </nav>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:0.75rem">
+    <div class="input-wrapper" style="flex-direction:row;align-items:center;gap:0.5rem;height:2.25rem;padding:0 0.75rem;border:1px solid var(--border-default);border-radius:0.5rem;background:var(--surface-card);width:15rem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1rem;height:1rem;color:var(--text-subtle);flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path></svg>
+      <input placeholder="Search issues..." style="border:0;outline:none;background:transparent;font-family:inherit;font-size:0.8125rem;letter-spacing:0.025em;color:var(--text-body);width:100%">
+      <span class="badge-base badge badge-neutral badge-soft" style="flex-shrink:0">/</span>
+    </div>
+    <div class="avatar" style="width:2.25rem;height:2.25rem">
+      <div class="avatar-display avatar-initial soft" data-color="primary" style="width:2.25rem;height:2.25rem;font-size:0.75rem">MT</div>
+    </div>
+  </div>
+</header>
+
+<div style="display:flex;align-items:center;gap:1rem;padding:0.75rem 2rem;background:var(--surface-card);border-bottom:1px solid var(--border-subtle)">
+  <nav style="display:flex;align-items:center;gap:0.5rem;font-size:0.8125rem;color:var(--text-muted)">
+    <a href="#" style="color:var(--text-muted)">Issues</a>
+    <span style="color:var(--text-subtle)">/</span>
+    <a href="#" style="color:var(--text-muted)">Payments &amp; Auth</a>
+    <span style="color:var(--text-subtle)">/</span>
+    <span style="font-weight:500;color:var(--text-heading)">LO-2387</span>
+  </nav>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:0.5rem">
+    <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" variant="flat" onClick="{{ toastBack }}" style="height:2rem;padding:0 0.75rem;gap:0.375rem;font-size:0.8125rem" hint-size="130px,32px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1rem;height:1rem"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path></svg>
+      Back To Issues
+    </x-import>
+    <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" variant="outlined" onClick="{{ toastCopy }}" style="height:2rem;padding:0 0.75rem;gap:0.375rem;font-size:0.8125rem" hint-size="110px,32px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1rem;height:1rem"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg>
+      Copy Link
+    </x-import>
+    <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" variant="flat" isIcon="{{ true }}" onClick="{{ toastMenu }}" style="width:2rem;height:2rem;border-radius:9999px" hint-size="32px,32px">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="width:1.125rem;height:1.125rem"><path d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"></path></svg>
+    </x-import>
+  </div>
+</div>
+
+<div style="max-width:1440px;margin:0 auto;padding:1.5rem 2rem 4rem;display:flex;flex-direction:column;gap:1.25rem">
+
+  <section class="card skin-shadow" style="padding:1.25rem 1.5rem">
+    <div style="display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:1;min-width:22rem">
+        <div style="display:flex;align-items:center;gap:0.625rem;flex-wrap:wrap">
+          <span style="font-family:var(--font-sans);font-size:0.75rem;font-weight:600;letter-spacing:0.06em;color:var(--color-primary-700)">LO-2387</span>
+          <span class="badge-base badge badge-soft" data-color="info">In Progress</span>
+          <span class="badge-base badge badge-soft" data-color="warning">High Priority</span>
+          <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
+            <span class="badge-base badge badge-filled" data-color="error">Blocked</span>
+          </sc-if>
+        </div>
+        <h1 style="margin:0.5rem 0 0;font-size:1.375rem;font-weight:600;letter-spacing:-0.01em;line-height:1.3;color:var(--text-strong)">Session expires unexpectedly during active use</h1>
+        <p style="margin:0.5rem 0 0;max-width:44rem;line-height:1.55;color:var(--text-muted);text-wrap:pretty">Authenticated users are signed out after roughly 12 minutes of continuous activity. The refresh token request returns 401 while the session is still valid.</p>
+      </div>
+      <div style="display:flex;gap:2.5rem;padding-left:1.5rem;border-left:1px solid var(--border-subtle)">
+        <div>
+          <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Assignee</p>
+          <div style="margin-top:0.5rem;display:flex;align-items:center;gap:0.5rem">
+            <div class="avatar" style="width:1.75rem;height:1.75rem"><div class="avatar-display avatar-initial filled" data-color="primary" style="width:1.75rem;height:1.75rem;font-size:0.6875rem">MT</div></div>
+            <div>
+              <p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Minh Tran</p>
+              <p style="margin:0;font-size:0.6875rem;color:var(--text-subtle)">Developer</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Due Date</p>
+          <div style="margin-top:0.5rem;display:flex;align-items:center;gap:0.375rem;color:var(--text-warning)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1rem;height:1rem"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span style="font-size:0.8125rem;font-weight:500">08 Aug, 18:00</span>
+          </div>
+          <p style="margin:0.125rem 0 0;font-size:0.6875rem;color:var(--text-subtle)">1 day 6 hours left</p>
+        </div>
+        <div>
+          <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Current Step</p>
+          <p style="margin:0.5rem 0 0;font-size:0.8125rem;font-weight:600;color:var(--text-heading)">Fix</p>
+          <p style="margin:0.125rem 0 0;font-size:0.6875rem;color:var(--text-subtle)">Step 2 of 5</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card skin-shadow">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1.5rem;border-bottom:1px solid var(--border-subtle)">
+      <h2 style="margin:0;font-size:0.9375rem;font-weight:500;letter-spacing:0.025em;color:var(--text-heading)">Issue Information</h2>
+      <span style="font-size:0.75rem;color:var(--text-subtle)">Shared across all tabs</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1.25rem;padding:1.125rem 1.5rem">
+      <div>
+        <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Severity</p>
+        <p style="margin:0.4375rem 0 0"><span class="badge-base badge badge-soft" data-color="error">Major</span></p>
+      </div>
+      <div>
+        <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Priority</p>
+        <p style="margin:0.4375rem 0 0"><span class="badge-base badge badge-soft" data-color="warning">High</span></p>
+      </div>
+      <div>
+        <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Environment</p>
+        <p style="margin:0.4375rem 0 0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Staging · Web</p>
+        <p style="margin:0;font-size:0.6875rem;color:var(--text-subtle)">Chrome 127 · macOS</p>
+      </div>
+      <div>
+        <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Affected Build</p>
+        <p style="margin:0.4375rem 0 0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">2.14.0-rc3</p>
+        <p style="margin:0;font-size:0.6875rem;color:var(--text-subtle)">Released 03 Aug</p>
+      </div>
+      <div>
+        <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Reporter</p>
+        <div style="margin-top:0.4375rem;display:flex;align-items:center;gap:0.4375rem">
+          <div class="avatar" style="width:1.5rem;height:1.5rem"><div class="avatar-display avatar-initial soft" data-color="info" style="width:1.5rem;height:1.5rem;font-size:0.625rem">LP</div></div>
+          <div>
+            <p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Lan Pham</p>
+            <p style="margin:0;font-size:0.6875rem;color:var(--text-subtle)">QA</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Reproduction Rate</p>
+        <p style="margin:0.4375rem 0 0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">8 / 10 runs</p>
+        <div class="progress-rail" data-color="warning" style="margin-top:0.375rem;height:0.25rem"><div class="progress" style="width:80%"></div></div>
+      </div>
+      <div>
+        <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Reported Time</p>
+        <p style="margin:0.4375rem 0 0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">04 Aug, 09:24</p>
+        <p style="margin:0;font-size:0.6875rem;color:var(--text-subtle)">2 days ago</p>
+      </div>
+    </div>
+  </section>
+
+  <div style="display:flex;align-items:center;gap:0.25rem;border-bottom:1px solid var(--border-subtle)">
+    <button type="button" data-tab="overview" onClick="{{ goOverview }}" style="appearance:none;background:none;border:0;border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:{{ tbOverview }};padding:0.625rem 1rem;font-family:inherit;font-size:0.875rem;font-weight:{{ twOverview }};letter-spacing:0.025em;color:{{ tcOverview }};cursor:pointer">Overview</button>
+    <button type="button" data-tab="qa" onClick="{{ goQa }}" style="appearance:none;background:none;border:0;border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:{{ tbQa }};padding:0.625rem 1rem;font-family:inherit;font-size:0.875rem;font-weight:{{ twQa }};letter-spacing:0.025em;color:{{ tcQa }};cursor:pointer">QA Report</button>
+    <button type="button" data-tab="history" onClick="{{ goHistory }}" style="appearance:none;background:none;border:0;border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:{{ tbHistory }};padding:0.625rem 1rem;font-family:inherit;font-size:0.875rem;font-weight:{{ twHistory }};letter-spacing:0.025em;color:{{ tcHistory }};cursor:pointer">History</button>
+    <span style="margin-left:auto;font-size:0.75rem;color:var(--text-subtle);padding-right:0.5rem">Updated 06 Aug, 10:12 by Minh Tran</span>
+  </div>
+
+  <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="Overview" style="display:grid;grid-template-columns:minmax(0,1fr) 21rem;gap:1.25rem;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:1.25rem;min-width:0">
+
+      <section class="card skin-shadow">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1.5rem;border-bottom:1px solid var(--border-subtle)">
+          <h2 style="margin:0;font-size:0.9375rem;font-weight:500;letter-spacing:0.025em;color:var(--text-heading)">Completion Flow</h2>
+          <div style="display:flex;align-items:center;gap:0.75rem">
+            <span style="font-size:0.75rem;color:var(--text-subtle)">1 of 5 steps completed</span>
+            <div class="progress-rail" data-color="primary" style="width:6rem;height:0.375rem"><div class="progress" style="width:30%"></div></div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:stretch;gap:0;padding:1.25rem 1.5rem">
+          <button type="button" data-step="debug" onClick="{{ goDebug }}" style="flex:1;text-align:left;appearance:none;font-family:inherit;cursor:pointer;background:var(--surface-card);border-width:1px;border-style:solid;border-color:{{ sbDebug }};box-shadow:{{ ssDebug }};border-radius:0.5rem;padding:0.75rem 0.875rem">
+            <div style="display:flex;align-items:center;gap:0.5rem">
+              <span style="display:flex;align-items:center;justify-content:center;width:1.375rem;height:1.375rem;border-radius:9999px;background:var(--color-success);color:#fff;flex-shrink:0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:0.75rem;height:0.75rem"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path></svg>
+              </span>
+              <span style="font-size:0.875rem;font-weight:600;color:var(--text-heading)">Debug</span>
+            </div>
+            <p style="margin:0.5rem 0 0"><span class="badge-base badge badge-soft" data-color="success">Completed</span></p>
+            <p style="margin:0.4375rem 0 0;font-size:0.6875rem;color:var(--text-subtle)">05 Aug, 11:40 · 3h 10m</p>
+          </button>
+          <div style="width:1.25rem;align-self:center;height:1px;background:var(--border-default);flex-shrink:0"></div>
+          <button type="button" data-step="fix" onClick="{{ goFix }}" style="flex:1;text-align:left;appearance:none;font-family:inherit;cursor:pointer;background:var(--surface-card);border-width:1px;border-style:solid;border-color:{{ sbFix }};box-shadow:{{ ssFix }};border-radius:0.5rem;padding:0.75rem 0.875rem">
+            <div style="display:flex;align-items:center;gap:0.5rem">
+              <span style="position:relative;display:flex;align-items:center;justify-content:center;width:1.375rem;height:1.375rem;border-radius:9999px;background:var(--accent-soft);color:var(--color-primary-700);font-size:0.6875rem;font-weight:600;flex-shrink:0">2
+                <span class="animate-ping" style="position:absolute;inset:0;border-radius:9999px;background:var(--color-primary-600);opacity:0.35"></span>
+              </span>
+              <span style="font-size:0.875rem;font-weight:600;color:var(--text-heading)">Fix</span>
+            </div>
+            <p style="margin:0.5rem 0 0"><span class="badge-base badge badge-soft" data-color="primary">In Progress</span></p>
+            <p style="margin:0.4375rem 0 0;font-size:0.6875rem;color:var(--text-subtle)">Started 05 Aug, 13:05</p>
+          </button>
+          <div style="width:1.25rem;align-self:center;height:1px;background:var(--border-default);flex-shrink:0"></div>
+          <button type="button" data-step="review" onClick="{{ goReview }}" style="flex:1;text-align:left;appearance:none;font-family:inherit;cursor:pointer;background:var(--surface-card);border-width:1px;border-style:solid;border-color:{{ sbReview }};box-shadow:{{ ssReview }};border-radius:0.5rem;padding:0.75rem 0.875rem">
+            <div style="display:flex;align-items:center;gap:0.5rem">
+              <span style="display:flex;align-items:center;justify-content:center;width:1.375rem;height:1.375rem;border-radius:9999px;background:var(--surface-inset);color:var(--text-muted);font-size:0.6875rem;font-weight:600;flex-shrink:0">3</span>
+              <span style="font-size:0.875rem;font-weight:600;color:var(--text-heading)">Review</span>
+            </div>
+            <p style="margin:0.5rem 0 0"><span class="badge-base badge badge-neutral badge-soft">Waiting</span></p>
+            <p style="margin:0.4375rem 0 0;font-size:0.6875rem;color:var(--text-subtle)">1 attempt returned to Fix</p>
+          </button>
+          <div style="width:1.25rem;align-self:center;height:1px;background:var(--border-default);flex-shrink:0"></div>
+          <button type="button" data-step="test" onClick="{{ goTest }}" style="flex:1;text-align:left;appearance:none;font-family:inherit;cursor:pointer;background:var(--surface-card);border-width:1px;border-style:solid;border-color:{{ sbTest }};box-shadow:{{ ssTest }};border-radius:0.5rem;padding:0.75rem 0.875rem">
+            <div style="display:flex;align-items:center;gap:0.5rem">
+              <span style="display:flex;align-items:center;justify-content:center;width:1.375rem;height:1.375rem;border-radius:9999px;background:var(--surface-inset);color:var(--text-muted);font-size:0.6875rem;font-weight:600;flex-shrink:0">4</span>
+              <span style="font-size:0.875rem;font-weight:600;color:var(--text-heading)">Test</span>
+            </div>
+            <p style="margin:0.5rem 0 0"><span class="badge-base badge badge-neutral badge-soft">Waiting</span></p>
+            <p style="margin:0.4375rem 0 0;font-size:0.6875rem;color:var(--text-subtle)">12 cases planned</p>
+          </button>
+          <div style="width:1.25rem;align-self:center;height:1px;background:var(--border-default);flex-shrink:0"></div>
+          <button type="button" data-step="complete" onClick="{{ goComplete }}" style="flex:1;text-align:left;appearance:none;font-family:inherit;cursor:pointer;background:var(--surface-card);border-width:1px;border-style:solid;border-color:{{ sbComplete }};box-shadow:{{ ssComplete }};border-radius:0.5rem;padding:0.75rem 0.875rem">
+            <div style="display:flex;align-items:center;gap:0.5rem">
+              <span style="display:flex;align-items:center;justify-content:center;width:1.375rem;height:1.375rem;border-radius:9999px;background:var(--surface-inset);color:var(--text-muted);font-size:0.6875rem;font-weight:600;flex-shrink:0">5</span>
+              <span style="font-size:0.875rem;font-weight:600;color:var(--text-heading)">Complete</span>
+            </div>
+            <p style="margin:0.5rem 0 0"><span class="badge-base badge badge-soft" data-color="warning">Pending</span></p>
+            <p style="margin:0.4375rem 0 0;font-size:0.6875rem;color:var(--text-subtle)">4 conditions remaining</p>
+          </button>
+        </div>
+
+        <sc-if value="{{ isDebug }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top:1px solid var(--border-subtle);padding:1.25rem 1.5rem;display:grid;grid-template-columns:minmax(0,1fr) 16rem;gap:1.5rem">
+            <div>
+              <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Analysis Result</p>
+              <p style="margin:0.4375rem 0 0;line-height:1.6;color:var(--text-body);text-wrap:pretty">The idle timer in <code style="font-family:ui-monospace,monospace;font-size:0.8125rem;color:var(--color-primary-700)">SessionProvider</code> is not reset by background refresh calls. When the refresh request and the timer expiry overlap, the client discards the new token and the next request is rejected with 401.</p>
+              <p style="margin:1rem 0 0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Root Cause</p>
+              <p style="margin:0.4375rem 0 0;padding:0.75rem 0.875rem;border-radius:0.5rem;background:var(--surface-sunken);line-height:1.55;color:var(--text-heading)">Race condition between the refresh-token response handler and the idle-timeout reset in the auth context.</p>
+            </div>
+            <div>
+              <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Debug Checklist</p>
+              <div style="margin-top:0.625rem;display:flex;flex-direction:column;gap:0.5rem">
+                <label style="display:flex;align-items:flex-start;gap:0.5rem;color:var(--text-muted)"><input type="checkbox" class="form-checkbox" data-color="success" checked disabled><span style="font-size:0.8125rem">Issue reproduced locally</span></label>
+                <label style="display:flex;align-items:flex-start;gap:0.5rem;color:var(--text-muted)"><input type="checkbox" class="form-checkbox" data-color="success" checked disabled><span style="font-size:0.8125rem">Root cause identified</span></label>
+                <label style="display:flex;align-items:flex-start;gap:0.5rem;color:var(--text-muted)"><input type="checkbox" class="form-checkbox" data-color="success" checked disabled><span style="font-size:0.8125rem">Impact scope mapped</span></label>
+                <label style="display:flex;align-items:flex-start;gap:0.5rem;color:var(--text-muted)"><input type="checkbox" class="form-checkbox" data-color="success" checked disabled><span style="font-size:0.8125rem">Fix approach agreed</span></label>
+              </div>
+              <p style="margin:1rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Completed by Minh Tran · 05 Aug, 11:40</p>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isFix }}" hint-placeholder-val="{{ true }}">
+          <div style="border-top:1px solid var(--border-subtle);padding:1.25rem 1.5rem;display:grid;grid-template-columns:minmax(0,1fr) 16rem;gap:1.5rem">
+            <div>
+              <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Solution Description</p>
+              <p style="margin:0.4375rem 0 0;line-height:1.6;color:var(--text-body);text-wrap:pretty">Refresh the access token before the idle timer expires and keep the session alive while the tab stays active. The refresh handler now resets the timer inside the same transaction.</p>
+              <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.5rem">
+                <span class="tag-base tag tag-neutral tag-soft" style="gap:0.375rem;padding:0.375rem 0.625rem">Branch · fix/LO-2387-session-refresh</span>
+                <a href="#" class="tag-base tag tag-soft" data-color="info" style="gap:0.375rem;padding:0.375rem 0.625rem">Pull Request · #1284</a>
+                <span class="tag-base tag tag-neutral tag-soft" style="gap:0.375rem;padding:0.375rem 0.625rem">Build · 2.14.0-rc4</span>
+              </div>
+            </div>
+            <div>
+              <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Step Owner</p>
+              <div style="margin-top:0.5rem;display:flex;align-items:center;gap:0.5rem">
+                <div class="avatar" style="width:1.75rem;height:1.75rem"><div class="avatar-display avatar-initial filled" data-color="primary" style="width:1.75rem;height:1.75rem;font-size:0.6875rem">MT</div></div>
+                <div>
+                  <p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Minh Tran</p>
+                  <p style="margin:0;font-size:0.6875rem;color:var(--text-subtle)">Attempt 2 · started 13:05</p>
+                </div>
+              </div>
+              <p style="margin:1rem 0 0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Transition Condition</p>
+              <p style="margin:0.4375rem 0 0;font-size:0.8125rem;line-height:1.5;color:var(--text-muted)">Code, unit test, self-test and pull request must be complete before Review can start.</p>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top:1px solid var(--border-subtle);padding:1.25rem 1.5rem;display:grid;grid-template-columns:minmax(0,1fr) 16rem;gap:1.5rem">
+            <div>
+              <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">CI Checks</p>
+              <div style="margin-top:0.625rem;display:flex;flex-direction:column;gap:0.5rem">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><span style="font-size:0.8125rem;color:var(--text-heading)">Build</span><span class="badge-base badge badge-soft" data-color="success">Passed</span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><span style="font-size:0.8125rem;color:var(--text-heading)">Unit tests · 214 / 214</span><span class="badge-base badge badge-soft" data-color="success">Passed</span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><span style="font-size:0.8125rem;color:var(--text-heading)">Lint</span><span class="badge-base badge badge-soft" data-color="success">Passed</span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><span style="font-size:0.8125rem;color:var(--text-heading)">E2E suite</span><span class="badge-base badge badge-neutral badge-soft">Queued</span></div>
+              </div>
+            </div>
+            <div>
+              <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Reviewer</p>
+              <div style="margin-top:0.5rem;display:flex;align-items:center;gap:0.5rem">
+                <div class="avatar" style="width:1.75rem;height:1.75rem"><div class="avatar-display avatar-initial soft" data-color="secondary" style="width:1.75rem;height:1.75rem;font-size:0.6875rem">HN</div></div>
+                <div>
+                  <p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Ha Nguyen</p>
+                  <p style="margin:0;font-size:0.6875rem;color:var(--text-subtle)">Tech Lead · PR #1284</p>
+                </div>
+              </div>
+              <p style="margin:1rem 0 0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Review Checklist</p>
+              <div style="margin-top:0.625rem;display:flex;flex-direction:column;gap:0.5rem">
+                <label style="display:flex;align-items:flex-start;gap:0.5rem;color:var(--text-muted)"><input type="checkbox" class="form-checkbox" disabled><span style="font-size:0.8125rem">CI checks green</span></label>
+                <label style="display:flex;align-items:flex-start;gap:0.5rem;color:var(--text-muted)"><input type="checkbox" class="form-checkbox" disabled><span style="font-size:0.8125rem">Required comments resolved</span></label>
+                <label style="display:flex;align-items:flex-start;gap:0.5rem;color:var(--text-muted)"><input type="checkbox" class="form-checkbox" disabled><span style="font-size:0.8125rem">Reviewer approved</span></label>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isTest }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top:1px solid var(--border-subtle);padding:1.25rem 1.5rem;display:grid;grid-template-columns:minmax(0,1fr) 16rem;gap:1.5rem">
+            <div>
+              <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Test Setup</p>
+              <div style="margin-top:0.625rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.75rem">
+                <div style="padding:0.75rem 0.875rem;border-radius:0.5rem;background:var(--surface-sunken)"><p style="margin:0;font-size:0.6875rem;color:var(--text-muted)">Environment</p><p style="margin:0.25rem 0 0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Staging · Web, iOS Safari</p></div>
+                <div style="padding:0.75rem 0.875rem;border-radius:0.5rem;background:var(--surface-sunken)"><p style="margin:0;font-size:0.6875rem;color:var(--text-muted)">Build</p><p style="margin:0.25rem 0 0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">2.14.0-rc4</p></div>
+              </div>
+              <p style="margin:1rem 0 0;font-size:0.8125rem;line-height:1.5;color:var(--text-muted)">Test starts once Review is approved. 12 cases are planned, 4 of them critical.</p>
+            </div>
+            <div>
+              <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Tester</p>
+              <div style="margin-top:0.5rem;display:flex;align-items:center;gap:0.5rem">
+                <div class="avatar" style="width:1.75rem;height:1.75rem"><div class="avatar-display avatar-initial soft" data-color="info" style="width:1.75rem;height:1.75rem;font-size:0.6875rem">LP</div></div>
+                <div>
+                  <p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Lan Pham</p>
+                  <p style="margin:0;font-size:0.6875rem;color:var(--text-subtle)">QA Engineer</p>
+                </div>
+              </div>
+              <p style="margin:1rem 0 0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Test Checklist</p>
+              <div style="margin-top:0.625rem;display:flex;flex-direction:column;gap:0.5rem">
+                <label style="display:flex;align-items:flex-start;gap:0.5rem;color:var(--text-muted)"><input type="checkbox" class="form-checkbox" disabled><span style="font-size:0.8125rem">Critical cases passed</span></label>
+                <label style="display:flex;align-items:flex-start;gap:0.5rem;color:var(--text-muted)"><input type="checkbox" class="form-checkbox" disabled><span style="font-size:0.8125rem">Regression suite passed</span></label>
+                <label style="display:flex;align-items:flex-start;gap:0.5rem;color:var(--text-muted)"><input type="checkbox" class="form-checkbox" disabled><span style="font-size:0.8125rem">Evidence attached</span></label>
+                <label style="display:flex;align-items:flex-start;gap:0.5rem;color:var(--text-muted)"><input type="checkbox" class="form-checkbox" disabled><span style="font-size:0.8125rem">No blocking defect</span></label>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isComplete }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top:1px solid var(--border-subtle);padding:1.25rem 1.5rem">
+            <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Conditions To Close</p>
+            <div style="margin-top:0.75rem;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0.75rem">
+              <div style="padding:0.75rem 0.875rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Critical tests passed</p><p style="margin:0.375rem 0 0"><span class="badge-base badge badge-neutral badge-soft">Waiting</span></p></div>
+              <div style="padding:0.75rem 0.875rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Regression passed</p><p style="margin:0.375rem 0 0"><span class="badge-base badge badge-neutral badge-soft">Waiting</span></p></div>
+              <div style="padding:0.75rem 0.875rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Evidence complete</p><p style="margin:0.375rem 0 0"><span class="badge-base badge badge-soft" data-color="warning">2 missing</span></p></div>
+              <div style="padding:0.75rem 0.875rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">No blocking defect</p><p style="margin:0.375rem 0 0"><span class="badge-base badge badge-soft" data-color="error">1 failed case</span></p></div>
+            </div>
+          </div>
+        </sc-if>
+      </section>
+
+      <section class="card skin-shadow">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1.5rem;border-bottom:1px solid var(--border-subtle)">
+          <div style="display:flex;align-items:center;gap:0.625rem">
+            <h2 style="margin:0;font-size:0.9375rem;font-weight:500;letter-spacing:0.025em;color:var(--text-heading)">Current Step Workspace</h2>
+            <span class="badge-base badge badge-soft" data-color="primary">Fix</span>
+          </div>
+          <span style="font-size:0.75rem;color:var(--text-subtle)">{{ remainingLabel }}</span>
+        </div>
+        <div style="padding:1.25rem 1.5rem;display:grid;grid-template-columns:minmax(0,1fr) 18rem;gap:1.75rem">
+          <div>
+            <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Transition Checklist</p>
+            <div onChange="{{ onCheck }}" style="margin-top:0.75rem;display:flex;flex-direction:column;gap:0.125rem">
+              <label style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.625rem;border-radius:0.5rem;cursor:pointer;min-width:0" style-hover="background:var(--surface-sunken)">
+                <input type="checkbox" class="form-checkbox" data-req="1" data-color="success" defaultChecked="{{ true }}">
+                <span style="font-size:0.8125rem;color:var(--text-heading);flex:1;min-width:0">Code complete</span>
+                <span class="badge-base badge badge-neutral badge-soft" style="flex-shrink:0">Required</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.625rem;border-radius:0.5rem;cursor:pointer;min-width:0" style-hover="background:var(--surface-sunken)">
+                <input type="checkbox" class="form-checkbox" data-req="1" data-color="success" defaultChecked="{{ true }}">
+                <span style="font-size:0.8125rem;color:var(--text-heading);flex:1;min-width:0">Unit tests updated</span>
+                <span class="badge-base badge badge-neutral badge-soft" style="flex-shrink:0">Required</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.625rem;border-radius:0.5rem;cursor:pointer;min-width:0" style-hover="background:var(--surface-sunken)">
+                <input type="checkbox" class="form-checkbox" data-req="1" data-color="success">
+                <span style="font-size:0.8125rem;color:var(--text-heading);flex:1;min-width:0">Self-test on staging</span>
+                <span class="badge-base badge badge-neutral badge-soft" style="flex-shrink:0">Required</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.625rem;border-radius:0.5rem;cursor:pointer;min-width:0" style-hover="background:var(--surface-sunken)">
+                <input type="checkbox" class="form-checkbox" data-req="1" data-color="success">
+                <span style="font-size:0.8125rem;color:var(--text-heading);flex:1;min-width:0">Pull request ready for review</span>
+                <span class="badge-base badge badge-neutral badge-soft" style="flex-shrink:0">Required</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.625rem;border-radius:0.5rem;cursor:pointer;min-width:0" style-hover="background:var(--surface-sunken)">
+                <input type="checkbox" class="form-checkbox" data-color="success">
+                <span style="font-size:0.8125rem;color:var(--text-heading);flex:1;min-width:0">Changelog note added</span>
+                <span class="badge-base badge badge-neutral badge-soft" style="flex-shrink:0">Optional</span>
+              </label>
+            </div>
+            <div style="margin-top:1.25rem;display:flex;align-items:center;gap:0.625rem;flex-wrap:wrap">
+              <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" color="primary" disabled="{{ notReady }}" onClick="{{ onMarkReady }}" hint-size="190px,40px">Mark Ready For Review</x-import>
+              <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" color="error" variant="outlined" onClick="{{ openBlocker }}" hint-size="140px,40px">Report Blocker</x-import>
+              <span style="font-size:0.75rem;color:var(--text-subtle)">{{ readyHint }}</span>
+            </div>
+            <sc-if value="{{ blockerOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:1rem;padding:1rem;border:1px solid var(--border-subtle);border-radius:0.5rem;background:var(--surface-sunken)">
+                <p style="margin:0;font-size:0.8125rem;font-weight:600;color:var(--text-heading)">Report Blocker</p>
+                <p style="margin:0.25rem 0 0.75rem;font-size:0.75rem;color:var(--text-muted)">The issue stays on Fix and the overall status changes to Blocked.</p>
+                <textarea placeholder="Describe what is blocking this step..." rows="2" class="form-textarea-base" style="width:100%;padding:0.5rem 0.75rem;border:1px solid var(--border-default);border-radius:0.5rem;background:var(--surface-card);font-family:inherit;font-size:0.8125rem;resize:vertical"></textarea>
+                <div style="margin-top:0.625rem;display:flex;align-items:center;gap:0.625rem">
+                  <select class="form-select-base" style="height:2.25rem;padding:0 0.75rem;border:1px solid var(--border-default);border-radius:0.5rem;background:var(--surface-card);font-family:inherit;font-size:0.8125rem;width:12rem">
+                    <option>Support from Backend</option>
+                    <option>Support from DevOps</option>
+                    <option>Support from Product</option>
+                  </select>
+                  <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" color="error" onClick="{{ submitBlocker }}" style="height:2.25rem" hint-size="120px,36px">Submit Blocker</x-import>
+                  <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" variant="flat" onClick="{{ closeBlocker }}" style="height:2.25rem" hint-size="80px,36px">Cancel</x-import>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+          <div>
+            <div style="padding:0.875rem 1rem;border-radius:0.5rem;background:var(--accent-soft)">
+              <div style="display:flex;align-items:center;gap:0.375rem;color:var(--color-primary-700)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1rem;height:1rem"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"></path></svg>
+                <span style="font-size:0.75rem;font-weight:600;letter-spacing:0.025em;text-transform:uppercase">AI Summary</span>
+              </div>
+              <p style="margin:0.5rem 0 0;font-size:0.8125rem;line-height:1.55;color:var(--text-body);text-wrap:pretty">The fix covers the refresh-token race in the auth context and unit tests are updated. Two required conditions remain: self-test on staging and pull request readiness.</p>
+            </div>
+            <p style="margin:1.25rem 0 0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Technical Links</p>
+            <div style="margin-top:0.625rem;display:flex;flex-direction:column;gap:0.5rem">
+              <a href="#" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><span style="font-size:0.8125rem;color:var(--text-heading)">Pull request #1284</span><span class="badge-base badge badge-soft" data-color="info">Open</span></a>
+              <a href="#" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><span style="font-size:0.8125rem;color:var(--text-heading)">fix/LO-2387-session-refresh</span><span style="font-size:0.75rem;color:var(--text-subtle)">7 commits</span></a>
+              <a href="#" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><span style="font-size:0.8125rem;color:var(--text-heading)">Build 2.14.0-rc4</span><span class="badge-base badge badge-soft" data-color="success">Passing</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem">
+        <div class="card skin-shadow" style="padding:1rem 1.25rem">
+          <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Pull Request</p>
+          <p style="margin:0.375rem 0 0;font-size:1.125rem;font-weight:600;color:var(--text-heading)">#1284</p>
+          <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">2 review comments open</p>
+        </div>
+        <div class="card skin-shadow" style="padding:1rem 1.25rem">
+          <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Evidence Files</p>
+          <p style="margin:0.375rem 0 0;font-size:1.125rem;font-weight:600;color:var(--text-heading)">6</p>
+          <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">1 video · 3 logs · 2 screenshots</p>
+        </div>
+        <div class="card skin-shadow" style="padding:1rem 1.25rem">
+          <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Comments</p>
+          <p style="margin:0.375rem 0 0;font-size:1.125rem;font-weight:600;color:var(--text-heading)">9</p>
+          <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Last by Ha Nguyen, 09:58</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:1.25rem;position:sticky;top:5.5rem">
+      <section class="card skin-shadow">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1.25rem;border-bottom:1px solid var(--border-subtle)">
+          <h2 style="margin:0;font-size:0.9375rem;font-weight:500;letter-spacing:0.025em;color:var(--text-heading)">Activity</h2>
+          <a href="#" onClick="{{ goHistory }}" style="font-size:0.75rem;font-weight:500">View Full History</a>
+        </div>
+        <div class="timeline line-space" style="padding:1.125rem 1.25rem">
+          <div class="timeline-item" data-color="info" style="padding-bottom:1.25rem">
+            <div class="timeline-item-point filled"></div>
+            <div class="timeline-item-content-wrappper">
+              <p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Pull request #1284 opened</p>
+              <p style="margin:0.125rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Minh Tran · 06 Aug, 09:42</p>
+            </div>
+          </div>
+          <div class="timeline-item" data-color="success" style="padding-bottom:1.25rem">
+            <div class="timeline-item-point filled"></div>
+            <div class="timeline-item-content-wrappper">
+              <p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Self-test on local build completed</p>
+              <p style="margin:0.125rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Minh Tran · 06 Aug, 08:15</p>
+            </div>
+          </div>
+          <div class="timeline-item" data-color="primary" style="padding-bottom:1.25rem">
+            <div class="timeline-item-point filled"></div>
+            <div class="timeline-item-content-wrappper">
+              <p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Status moved from Debug to Fix</p>
+              <p style="margin:0.125rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Minh Tran · 05 Aug, 13:05</p>
+            </div>
+          </div>
+          <div class="timeline-item" data-color="warning" style="padding-bottom:1.25rem">
+            <div class="timeline-item-point filled"></div>
+            <div class="timeline-item-content-wrappper">
+              <p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Debug started, evidence attached</p>
+              <p style="margin:0.125rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Minh Tran · 05 Aug, 08:30</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-item-point"></div>
+            <div class="timeline-item-content-wrappper">
+              <p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Issue reported by QA</p>
+              <p style="margin:0.125rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Lan Pham · 04 Aug, 09:24</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card skin-shadow" style="padding:1.125rem 1.25rem">
+        <div style="display:flex;align-items:center;gap:0.375rem;color:var(--text-warning)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1rem;height:1rem"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg>
+          <span style="font-size:0.75rem;font-weight:600;letter-spacing:0.025em;text-transform:uppercase">AI Risk Check</span>
+        </div>
+        <p style="margin:0.5rem 0 0;font-size:0.8125rem;line-height:1.55;color:var(--text-body);text-wrap:pretty">The change touches shared auth context. Sign-out, remember-me and token refresh on mobile should be covered in regression.</p>
+        <div style="margin-top:0.75rem;display:flex;flex-wrap:wrap;gap:0.375rem">
+          <span class="tag-base tag tag-soft" data-color="warning">Auth context</span>
+          <span class="tag-base tag tag-soft" data-color="warning">Mobile session</span>
+          <span class="tag-base tag tag-neutral tag-soft">3 files</span>
+        </div>
+        <div style="margin-top:0.875rem">
+          <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" variant="outlined" onClick="{{ toastAi }}" style="height:2rem;font-size:0.8125rem;padding:0 0.875rem" hint-size="130px,32px">Run Risk Check</x-import>
+        </div>
+      </section>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isQa }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="QA Report" style="display:grid;grid-template-columns:minmax(0,1fr) 21rem;gap:1.25rem;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:1.25rem;min-width:0">
+
+      <section class="card skin-shadow">
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.875rem 1.5rem;border-bottom:1px solid var(--border-subtle)">
+          <span style="font-size:0.75rem;font-weight:600;letter-spacing:0.06em;color:var(--text-subtle)">01</span>
+          <h2 style="margin:0;font-size:0.9375rem;font-weight:500;letter-spacing:0.025em;color:var(--text-heading)">Bug Description</h2>
+          <span class="badge-base badge badge-soft" data-color="success" style="margin-left:auto">From QA report</span>
+        </div>
+        <div style="padding:1.25rem 1.5rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem">
+          <div>
+            <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-error)">Actual Result</p>
+            <p style="margin:0.4375rem 0 0;line-height:1.6;color:var(--text-body);text-wrap:pretty">After about 12 minutes of continuous use the app returns to the sign-in screen and unsaved form data is lost.</p>
+          </div>
+          <div>
+            <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-success)">Expected Result</p>
+            <p style="margin:0.4375rem 0 0;line-height:1.6;color:var(--text-body);text-wrap:pretty">The session stays alive while the user is active and the access token refreshes silently in the background.</p>
+          </div>
+        </div>
+        <div style="padding:0 1.5rem 1.25rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem">
+          <div>
+            <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Steps To Reproduce</p>
+            <ol style="margin:0.5rem 0 0;padding-left:1.25rem;display:flex;flex-direction:column;gap:0.375rem;line-height:1.5;color:var(--text-body)">
+              <li>Sign in on staging with a standard account.</li>
+              <li>Open the Orders list and keep scrolling and filtering.</li>
+              <li>Wait until the 12th minute without reloading the page.</li>
+              <li>Trigger any request, for example open an order detail.</li>
+            </ol>
+          </div>
+          <div>
+            <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Evidence</p>
+            <div style="margin-top:0.5rem;display:flex;flex-direction:column;gap:0.5rem">
+              <a href="#" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem;color:var(--text-heading)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1rem;height:1rem;color:var(--text-subtle)"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"></path></svg>
+                <span style="font-size:0.8125rem">session-expiry.mp4</span><span style="margin-left:auto;font-size:0.6875rem;color:var(--text-subtle)">1:24</span>
+              </a>
+              <a href="#" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem;color:var(--text-heading)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1rem;height:1rem;color:var(--text-subtle)"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path></svg>
+                <span style="font-size:0.8125rem">api-log-0804.txt</span><span style="margin-left:auto;font-size:0.6875rem;color:var(--text-subtle)">42 KB</span>
+              </a>
+              <a href="#" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem;color:var(--text-heading)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1rem;height:1rem;color:var(--text-subtle)"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path></svg>
+                <span style="font-size:0.8125rem">screenshot-401.png</span><span style="margin-left:auto;font-size:0.6875rem;color:var(--text-subtle)">208 KB</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card skin-shadow">
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.875rem 1.5rem;border-bottom:1px solid var(--border-subtle)">
+          <span style="font-size:0.75rem;font-weight:600;letter-spacing:0.06em;color:var(--text-subtle)">02</span>
+          <h2 style="margin:0;font-size:0.9375rem;font-weight:500;letter-spacing:0.025em;color:var(--text-heading)">Debug &amp; Root Cause</h2>
+          <span class="badge-base badge badge-soft" data-color="success" style="margin-left:auto">Confirmed</span>
+        </div>
+        <div style="padding:1.25rem 1.5rem">
+          <p style="margin:0;padding:0.875rem 1rem;border-radius:0.5rem;background:var(--surface-sunken);line-height:1.6;color:var(--text-heading)">Race condition between the refresh-token response handler and the idle-timeout reset in <code style="font-family:ui-monospace,monospace;font-size:0.8125rem;color:var(--color-primary-700)">SessionProvider</code>. The client stores the old token and the following request is rejected with 401.</p>
+          <div style="margin-top:1.125rem;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem">
+            <div>
+              <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Affected Component</p>
+              <p style="margin:0.4375rem 0 0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">auth/SessionProvider</p>
+              <p style="margin:0;font-size:0.6875rem;color:var(--text-subtle)">3 files, 148 lines</p>
+            </div>
+            <div>
+              <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Impact Scope</p>
+              <p style="margin:0.4375rem 0 0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">All authenticated sessions</p>
+              <p style="margin:0;font-size:0.6875rem;color:var(--text-subtle)">Web and mobile web</p>
+            </div>
+            <div>
+              <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Trigger Condition</p>
+              <p style="margin:0.4375rem 0 0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Refresh call overlaps idle timer</p>
+              <p style="margin:0;font-size:0.6875rem;color:var(--text-subtle)">Window of about 400 ms</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card skin-shadow">
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.875rem 1.5rem;border-bottom:1px solid var(--border-subtle)">
+          <span style="font-size:0.75rem;font-weight:600;letter-spacing:0.06em;color:var(--text-subtle)">03</span>
+          <h2 style="margin:0;font-size:0.9375rem;font-weight:500;letter-spacing:0.025em;color:var(--text-heading)">Fix Information</h2>
+          <span class="badge-base badge badge-soft" data-color="primary" style="margin-left:auto">In Progress</span>
+        </div>
+        <div style="padding:1.25rem 1.5rem;display:grid;grid-template-columns:minmax(0,1fr) 17rem;gap:1.5rem">
+          <div>
+            <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Implemented Solution</p>
+            <p style="margin:0.4375rem 0 0;line-height:1.6;color:var(--text-body);text-wrap:pretty">The refresh handler now resets the idle timer inside the same transaction and a single-flight guard prevents two refresh calls from overlapping.</p>
+            <p style="margin:1.125rem 0 0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-warning)">Remaining Risk</p>
+            <p style="margin:0.4375rem 0 0;line-height:1.6;color:var(--text-body);text-wrap:pretty">Token refresh on iOS Safari after the tab returns from background is not covered yet and needs a dedicated test case.</p>
+          </div>
+          <div>
+            <p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Records</p>
+            <div style="margin-top:0.5rem;display:flex;flex-direction:column;gap:0.5rem">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><span style="font-size:0.75rem;color:var(--text-muted)">Branch</span><span style="font-size:0.75rem;font-weight:500;color:var(--text-heading)">fix/LO-2387</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><span style="font-size:0.75rem;color:var(--text-muted)">Pull request</span><a href="#" style="font-size:0.75rem;font-weight:500">#1284</a></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border:1px solid var(--border-subtle);border-radius:0.5rem"><span style="font-size:0.75rem;color:var(--text-muted)">Latest commit</span><span style="font-size:0.75rem;font-weight:500;color:var(--text-heading)">a91f4c2</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card skin-shadow">
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.875rem 1.5rem;border-bottom:1px solid var(--border-subtle)">
+          <span style="font-size:0.75rem;font-weight:600;letter-spacing:0.06em;color:var(--text-subtle)">04</span>
+          <h2 style="margin:0;font-size:0.9375rem;font-weight:500;letter-spacing:0.025em;color:var(--text-heading)">Test Verification</h2>
+          <span class="badge-base badge badge-soft" data-color="warning" style="margin-left:auto">Incomplete</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;padding:1.25rem 1.5rem">
+          <div style="padding:0.875rem 1rem;border-radius:0.5rem;background:var(--surface-sunken)"><p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Total Cases</p><p style="margin:0.25rem 0 0;font-size:1.375rem;font-weight:600;color:var(--text-heading)">12</p></div>
+          <div style="padding:0.875rem 1rem;border-radius:0.5rem;background:var(--surface-sunken)" data-color="success"><p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Passed</p><p style="margin:0.25rem 0 0;font-size:1.375rem;font-weight:600;color:var(--this-darker)">9</p></div>
+          <div style="padding:0.875rem 1rem;border-radius:0.5rem;background:var(--surface-sunken)" data-color="warning"><p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Pending</p><p style="margin:0.25rem 0 0;font-size:1.375rem;font-weight:600;color:var(--this-darker)">2</p></div>
+          <div style="padding:0.875rem 1rem;border-radius:0.5rem;background:var(--surface-sunken)" data-color="error"><p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Failed</p><p style="margin:0.25rem 0 0;font-size:1.375rem;font-weight:600;color:var(--this-darker)">1</p></div>
+        </div>
+        <table class="table is-hoverable" style="width:100%">
+          <thead class="table-thead">
+            <tr class="table-tr" style="border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle)">
+              <th class="table-th">Test Item</th><th class="table-th">Scope</th><th class="table-th">Result</th><th class="table-th">Evidence</th>
+            </tr>
+          </thead>
+          <tbody class="table-tbody">
+            <tr class="table-tr"><td class="table-td" style="font-weight:500;color:var(--text-heading)">Session stays alive for 30 minutes of activity</td><td class="table-td" style="color:var(--text-muted)">Critical</td><td class="table-td"><span class="badge-base badge badge-soft" data-color="success">Passed</span></td><td class="table-td"><a href="#" style="font-size:0.8125rem">test-01.mp4</a></td></tr>
+            <tr class="table-tr"><td class="table-td" style="font-weight:500;color:var(--text-heading)">Silent token refresh returns 200</td><td class="table-td" style="color:var(--text-muted)">Critical</td><td class="table-td"><span class="badge-base badge badge-soft" data-color="success">Passed</span></td><td class="table-td"><a href="#" style="font-size:0.8125rem">refresh-log.txt</a></td></tr>
+            <tr class="table-tr"><td class="table-td" style="font-weight:500;color:var(--text-heading)">Manual sign-out clears the session</td><td class="table-td" style="color:var(--text-muted)">Regression</td><td class="table-td"><span class="badge-base badge badge-soft" data-color="success">Passed</span></td><td class="table-td"><a href="#" style="font-size:0.8125rem">test-03.png</a></td></tr>
+            <tr class="table-tr"><td class="table-td" style="font-weight:500;color:var(--text-heading)">Session restored after tab returns from background</td><td class="table-td" style="color:var(--text-muted)">Critical</td><td class="table-td"><span class="badge-base badge badge-soft" data-color="error">Failed</span></td><td class="table-td"><a href="#" style="font-size:0.8125rem">ios-safari.mp4</a></td></tr>
+            <tr class="table-tr"><td class="table-td" style="font-weight:500;color:var(--text-heading)">Remember-me keeps the session for 7 days</td><td class="table-td" style="color:var(--text-muted)">Regression</td><td class="table-td"><span class="badge-base badge badge-neutral badge-soft">Pending</span></td><td class="table-td" style="color:var(--text-subtle)">Not attached</td></tr>
+            <tr class="table-tr"><td class="table-td" style="font-weight:500;color:var(--text-heading)">Concurrent tabs share one refresh call</td><td class="table-td" style="color:var(--text-muted)">Regression</td><td class="table-td"><span class="badge-base badge badge-neutral badge-soft">Pending</span></td><td class="table-td" style="color:var(--text-subtle)">Not attached</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:1.25rem;position:sticky;top:5.5rem">
+      <section class="card skin-shadow">
+        <div style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border-subtle)">
+          <h2 style="margin:0;font-size:0.9375rem;font-weight:500;letter-spacing:0.025em;color:var(--text-heading)">Report Readiness</h2>
+        </div>
+        <div style="padding:1.125rem 1.25rem">
+          <div style="display:flex;align-items:baseline;gap:0.5rem">
+            <span style="font-size:1.75rem;font-weight:600;color:var(--text-heading)">72%</span>
+            <span style="font-size:0.75rem;color:var(--text-subtle)">3 of 4 groups complete</span>
+          </div>
+          <div class="progress-rail" data-color="warning" style="margin-top:0.625rem"><div class="progress" style="width:72%"></div></div>
+          <div style="margin-top:1.125rem;display:flex;flex-direction:column;gap:0.75rem">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:0.8125rem;color:var(--text-heading)">Issue information</span><span class="badge-base badge badge-soft" data-color="success">Complete</span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:0.8125rem;color:var(--text-heading)">Root cause</span><span class="badge-base badge badge-soft" data-color="success">Complete</span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:0.8125rem;color:var(--text-heading)">Fix record</span><span class="badge-base badge badge-soft" data-color="success">Complete</span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:0.8125rem;color:var(--text-heading)">Test verification</span><span class="badge-base badge badge-soft" data-color="warning">1 failed · 2 pending</span></div>
+          </div>
+          <p style="margin:1.125rem 0 0;padding-top:0.875rem;border-top:1px solid var(--border-subtle);font-size:0.75rem;line-height:1.5;color:var(--text-muted)">The conclusion is confirmed only when all critical test cases pass and required evidence is attached.</p>
+        </div>
+      </section>
+
+      <section class="card skin-shadow" style="padding:1.125rem 1.25rem">
+        <div style="display:flex;align-items:center;gap:0.375rem;color:var(--color-primary-700)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1rem;height:1rem"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"></path></svg>
+          <span style="font-size:0.75rem;font-weight:600;letter-spacing:0.025em;text-transform:uppercase">AI Report Check</span>
+        </div>
+        <ul style="margin:0.625rem 0 0;padding-left:1.125rem;display:flex;flex-direction:column;gap:0.375rem;font-size:0.8125rem;line-height:1.5;color:var(--text-body)">
+          <li>Evidence missing for 2 pending regression cases.</li>
+          <li>The failed iOS Safari case has no follow-up record.</li>
+          <li>Root cause and fix description are consistent.</li>
+        </ul>
+        <div style="margin-top:0.875rem">
+          <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" variant="outlined" onClick="{{ toastReportCheck }}" style="height:2rem;font-size:0.8125rem;padding:0 0.875rem" hint-size="150px,32px">Re-run Report Check</x-import>
+        </div>
+      </section>
+
+      <section class="card skin-shadow" style="padding:1.125rem 1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+        <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" color="primary" disabled="{{ true }}" style="width:100%" hint-size="100%,40px">Confirm Issue Resolved</x-import>
+        <p style="margin:0 0 0.25rem;font-size:0.6875rem;color:var(--text-subtle);text-align:center">Available when all required conditions are complete</p>
+        <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" variant="outlined" onClick="{{ toastExport }}" style="width:100%" hint-size="100%,40px">Export Report</x-import>
+        <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" variant="flat" onClick="{{ toastCopy }}" style="width:100%" hint-size="100%,40px">Copy Report Link</x-import>
+        <x-import component-from-global-scope="LIFTTailuxDesignSystem_19bb17.Button" color="error" variant="flat" onClick="{{ toastReopen }}" style="width:100%" hint-size="100%,40px">Reopen Issue</x-import>
+      </section>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isHistory }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="History" style="display:grid;grid-template-columns:minmax(0,1fr) 21rem;gap:1.25rem;align-items:start">
+    <section class="card skin-shadow" style="min-width:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0.875rem 1.5rem;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap">
+        <h2 style="margin:0;font-size:0.9375rem;font-weight:500;letter-spacing:0.025em;color:var(--text-heading)">Activity Timeline</h2>
+        <div style="display:flex;align-items:center;gap:0.375rem">
+          <button type="button" data-filter="all" onClick="{{ filterAll }}" style="appearance:none;font-family:inherit;cursor:pointer;padding:0.3125rem 0.75rem;border-width:1px;border-style:solid;border-color:{{ fbcAll }};border-radius:9999px;background:{{ fbAll }};font-size:0.75rem;font-weight:500;letter-spacing:0.025em;color:{{ fcAll }}">All Activity</button>
+          <button type="button" data-filter="workflow" onClick="{{ filterWorkflow }}" style="appearance:none;font-family:inherit;cursor:pointer;padding:0.3125rem 0.75rem;border-width:1px;border-style:solid;border-color:{{ fbcWorkflow }};border-radius:9999px;background:{{ fbWorkflow }};font-size:0.75rem;font-weight:500;letter-spacing:0.025em;color:{{ fcWorkflow }}">Workflow</button>
+          <button type="button" data-filter="code" onClick="{{ filterCode }}" style="appearance:none;font-family:inherit;cursor:pointer;padding:0.3125rem 0.75rem;border-width:1px;border-style:solid;border-color:{{ fbcCode }};border-radius:9999px;background:{{ fbCode }};font-size:0.75rem;font-weight:500;letter-spacing:0.025em;color:{{ fcCode }}">Code &amp; PR</button>
+          <button type="button" data-filter="test" onClick="{{ filterTest }}" style="appearance:none;font-family:inherit;cursor:pointer;padding:0.3125rem 0.75rem;border-width:1px;border-style:solid;border-color:{{ fbcTest }};border-radius:9999px;background:{{ fbTest }};font-size:0.75rem;font-weight:500;letter-spacing:0.025em;color:{{ fcTest }}">Test</button>
+          <button type="button" data-filter="comment" onClick="{{ filterComment }}" style="appearance:none;font-family:inherit;cursor:pointer;padding:0.3125rem 0.75rem;border-width:1px;border-style:solid;border-color:{{ fbcComment }};border-radius:9999px;background:{{ fbComment }};font-size:0.75rem;font-weight:500;letter-spacing:0.025em;color:{{ fcComment }}">Comments</button>
+        </div>
+      </div>
+
+      <div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1.5rem">
+
+        <div>
+          <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.875rem">
+            <span class="badge-base badge badge-soft" data-color="primary">Fix attempt 2</span>
+            <span style="font-size:0.75rem;color:var(--text-subtle)">06 Aug · current</span>
+            <span style="flex:1;height:1px;background:var(--border-subtle)"></span>
+          </div>
+          <div class="timeline line-space">
+            <div class="timeline-item" data-act-type="code" data-color="info" style="padding-bottom:1.25rem">
+              <div class="timeline-item-point filled"></div>
+              <div class="timeline-item-content-wrappper">
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Pull request #1284 opened</p><span class="badge-base badge badge-soft" data-color="info">Code &amp; PR</span></div>
+                <p style="margin:0.25rem 0 0;font-size:0.8125rem;line-height:1.5;color:var(--text-muted)">Single-flight guard added to the refresh handler. 3 files changed, 148 additions.</p>
+                <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Minh Tran · 06 Aug, 09:42 · PR #1284</p>
+              </div>
+            </div>
+            <div class="timeline-item" data-act-type="comment" data-color="secondary" style="padding-bottom:1.25rem">
+              <div class="timeline-item-point filled"></div>
+              <div class="timeline-item-content-wrappper">
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Comment on refresh guard</p><span class="badge-base badge badge-soft" data-color="secondary">Comment</span></div>
+                <p style="margin:0.25rem 0 0;font-size:0.8125rem;line-height:1.5;color:var(--text-muted)">Ha Nguyen asked for a test that covers the tab returning from background.</p>
+                <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Ha Nguyen · 06 Aug, 09:58 · Comment #9</p>
+              </div>
+            </div>
+            <div class="timeline-item" data-act-type="test" data-color="success">
+              <div class="timeline-item-point filled"></div>
+              <div class="timeline-item-content-wrappper">
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Self-test completed on local build</p><span class="badge-base badge badge-soft" data-color="success">Test</span></div>
+                <p style="margin:0.25rem 0 0;font-size:0.8125rem;line-height:1.5;color:var(--text-muted)">Session held for 30 minutes of continuous activity. Evidence attached.</p>
+                <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Minh Tran · 06 Aug, 08:15 · self-test.mp4</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.875rem">
+            <span class="badge-base badge badge-soft" data-color="error">Review attempt 1 · returned</span>
+            <span style="font-size:0.75rem;color:var(--text-subtle)">05 Aug</span>
+            <span style="flex:1;height:1px;background:var(--border-subtle)"></span>
+          </div>
+          <div class="timeline line-space">
+            <div class="timeline-item" data-act-type="workflow" data-color="error" style="padding-bottom:1.25rem">
+              <div class="timeline-item-point filled"></div>
+              <div class="timeline-item-content-wrappper">
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Review returned to Fix</p><span class="badge-base badge badge-soft" data-color="primary">Workflow</span></div>
+                <p style="margin:0.25rem 0 0;font-size:0.8125rem;line-height:1.5;color:var(--text-muted)">Refresh call was not guarded against concurrent tabs. A new Fix attempt was created.</p>
+                <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Ha Nguyen · 05 Aug, 17:20 · Rework 1</p>
+              </div>
+            </div>
+            <div class="timeline-item" data-act-type="code" data-color="info">
+              <div class="timeline-item-point filled"></div>
+              <div class="timeline-item-content-wrappper">
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">CI checks passed on rc3</p><span class="badge-base badge badge-soft" data-color="info">Code &amp; PR</span></div>
+                <p style="margin:0.25rem 0 0;font-size:0.8125rem;line-height:1.5;color:var(--text-muted)">Build, lint and 214 unit tests passed.</p>
+                <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">CI · 05 Aug, 16:44 · Pipeline #4471</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.875rem">
+            <span class="badge-base badge badge-neutral badge-soft">Fix attempt 1</span>
+            <span style="font-size:0.75rem;color:var(--text-subtle)">05 Aug</span>
+            <span style="flex:1;height:1px;background:var(--border-subtle)"></span>
+          </div>
+          <div class="timeline line-space">
+            <div class="timeline-item" data-act-type="workflow" data-color="primary" style="padding-bottom:1.25rem">
+              <div class="timeline-item-point filled"></div>
+              <div class="timeline-item-content-wrappper">
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Status moved from Debug to Fix</p><span class="badge-base badge badge-soft" data-color="primary">Workflow</span></div>
+                <p style="margin:0.25rem 0 0;font-size:0.8125rem;line-height:1.5;color:var(--text-muted)">Root cause confirmed and fix approach agreed with the tech lead.</p>
+                <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Minh Tran · 05 Aug, 13:05</p>
+              </div>
+            </div>
+            <div class="timeline-item" data-act-type="code" data-color="info">
+              <div class="timeline-item-point filled"></div>
+              <div class="timeline-item-content-wrappper">
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">7 commits pushed to fix branch</p><span class="badge-base badge badge-soft" data-color="info">Code &amp; PR</span></div>
+                <p style="margin:0.25rem 0 0;font-size:0.8125rem;line-height:1.5;color:var(--text-muted)">Timer reset moved into the refresh transaction.</p>
+                <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Minh Tran · 05 Aug, 15:10 · a91f4c2</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.875rem">
+            <span class="badge-base badge badge-soft" data-color="success">Debug attempt 1</span>
+            <span style="font-size:0.75rem;color:var(--text-subtle)">05 Aug · 3h 10m</span>
+            <span style="flex:1;height:1px;background:var(--border-subtle)"></span>
+          </div>
+          <div class="timeline line-space">
+            <div class="timeline-item" data-act-type="workflow" data-color="success" style="padding-bottom:1.25rem">
+              <div class="timeline-item-point filled"></div>
+              <div class="timeline-item-content-wrappper">
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Root cause confirmed</p><span class="badge-base badge badge-soft" data-color="primary">Workflow</span></div>
+                <p style="margin:0.25rem 0 0;font-size:0.8125rem;line-height:1.5;color:var(--text-muted)">Race condition between refresh handler and idle timer reset.</p>
+                <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Minh Tran · 05 Aug, 11:40</p>
+              </div>
+            </div>
+            <div class="timeline-item" data-act-type="test" data-color="warning">
+              <div class="timeline-item-point filled"></div>
+              <div class="timeline-item-content-wrappper">
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Issue reproduced 8 of 10 runs</p><span class="badge-base badge badge-soft" data-color="success">Test</span></div>
+                <p style="margin:0.25rem 0 0;font-size:0.8125rem;line-height:1.5;color:var(--text-muted)">Reproduced on staging with network throttling enabled.</p>
+                <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Minh Tran · 05 Aug, 09:20 · debug-log.txt</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.875rem">
+            <span class="badge-base badge badge-neutral badge-soft">Issue reported</span>
+            <span style="font-size:0.75rem;color:var(--text-subtle)">04 Aug</span>
+            <span style="flex:1;height:1px;background:var(--border-subtle)"></span>
+          </div>
+          <div class="timeline line-space">
+            <div class="timeline-item" data-act-type="workflow">
+              <div class="timeline-item-point"></div>
+              <div class="timeline-item-content-wrappper">
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap"><p style="margin:0;font-size:0.8125rem;font-weight:500;color:var(--text-heading)">Issue reported by QA</p><span class="badge-base badge badge-soft" data-color="primary">Workflow</span></div>
+                <p style="margin:0.25rem 0 0;font-size:0.8125rem;line-height:1.5;color:var(--text-muted)">Severity Major, priority High, reproduction rate 8 of 10 runs. 3 evidence files attached.</p>
+                <p style="margin:0.25rem 0 0;font-size:0.75rem;color:var(--text-subtle)">Lan Pham · 04 Aug, 09:24</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div style="display:flex;flex-direction:column;gap:1.25rem;position:sticky;top:5.5rem">
+      <section class="card skin-shadow">
+        <div style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border-subtle)">
+          <h2 style="margin:0;font-size:0.9375rem;font-weight:500;letter-spacing:0.025em;color:var(--text-heading)">Processing Summary</h2>
+        </div>
+        <div style="padding:1.125rem 1.25rem">
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.75rem">
+            <div style="padding:0.75rem 0.875rem;border-radius:0.5rem;background:var(--surface-sunken)"><p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Total Elapsed</p><p style="margin:0.25rem 0 0;font-size:1.125rem;font-weight:600;color:var(--text-heading)">2d 4h</p></div>
+            <div style="padding:0.75rem 0.875rem;border-radius:0.5rem;background:var(--surface-sunken)"><p style="margin:0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Active Time</p><p style="margin:0.25rem 0 0;font-size:1.125rem;font-weight:600;color:var(--text-heading)">9h 40m</p></div>
+          </div>
+          <p style="margin:1.125rem 0 0;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;color:var(--text-muted)">Time By Step</p>
+          <div style="margin-top:0.625rem;display:flex;flex-direction:column;gap:0.625rem">
+            <div><div style="display:flex;justify-content:space-between;font-size:0.8125rem;color:var(--text-heading)"><span>Debug · 1 attempt</span><span style="font-weight:500">3h 10m</span></div><div class="progress-rail" data-color="success" style="margin-top:0.3125rem;height:0.25rem"><div class="progress" style="width:33%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:0.8125rem;color:var(--text-heading)"><span>Fix · 2 attempts</span><span style="font-weight:500">4h 05m</span></div><div class="progress-rail" data-color="primary" style="margin-top:0.3125rem;height:0.25rem"><div class="progress" style="width:42%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:0.8125rem;color:var(--text-heading)"><span>Review · 1 attempt</span><span style="font-weight:500">1h 20m</span></div><div class="progress-rail" data-color="info" style="margin-top:0.3125rem;height:0.25rem"><div class="progress" style="width:14%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:0.8125rem;color:var(--text-heading)"><span>Test · 1 attempt</span><span style="font-weight:500">1h 05m</span></div><div class="progress-rail" data-color="warning" style="margin-top:0.3125rem;height:0.25rem"><div class="progress" style="width:11%"></div></div></div>
+          </div>
+          <div style="margin-top:1.125rem;padding-top:0.875rem;border-top:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:0.8125rem;color:var(--text-heading)">Rework status</span>
+            <span class="badge-base badge badge-soft" data-color="error">1 rework · Review to Fix</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card skin-shadow">
+        <div style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border-subtle)">
+          <h2 style="margin:0;font-size:0.9375rem;font-weight:500;letter-spacing:0.025em;color:var(--text-heading)">Related Records</h2>
+        </div>
+        <div style="padding:0.5rem 0.75rem">
+          <a href="#" style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0.5rem;border-radius:0.5rem;color:var(--text-heading)" style-hover="background:var(--surface-sunken)"><span style="font-size:0.8125rem">Pull requests</span><span style="font-size:0.8125rem;font-weight:500;color:var(--text-muted)">1</span></a>
+          <a href="#" style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0.5rem;border-radius:0.5rem;color:var(--text-heading)" style-hover="background:var(--surface-sunken)"><span style="font-size:0.8125rem">Commits</span><span style="font-size:0.8125rem;font-weight:500;color:var(--text-muted)">7</span></a>
+          <a href="#" style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0.5rem;border-radius:0.5rem;color:var(--text-heading)" style-hover="background:var(--surface-sunken)"><span style="font-size:0.8125rem">Evidence files</span><span style="font-size:0.8125rem;font-weight:500;color:var(--text-muted)">6</span></a>
+          <a href="#" style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0.5rem;border-radius:0.5rem;color:var(--text-heading)" style-hover="background:var(--surface-sunken)"><span style="font-size:0.8125rem">Comments</span><span style="font-size:0.8125rem;font-weight:500;color:var(--text-muted)">9</span></a>
+        </div>
+      </section>
+    </div>
+  </div>
+  </sc-if>
+</div>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;right:1.5rem;bottom:1.5rem;z-index:60;display:flex;align-items:center;gap:0.625rem;padding:0.75rem 1rem;border-radius:0.5rem;background:var(--color-gray-800);color:#fff;box-shadow:var(--shadow-soft);max-width:22rem">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1rem;height:1rem;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path></svg>
+    <span style="font-size:0.8125rem;letter-spacing:0.025em">{{ toast }}</span>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+class Component extends DCLogic {
+  state = { tab: "overview", step: "fix", filter: "all", toast: "", blockerOpen: false, blocked: false, doneReq: 2 };
+
+  rootRef = React.createRef();
+  reqTotal = 4;
+
+  componentDidMount() { this.applyChrome(); }
+  componentDidUpdate() { this.applyChrome(); }
+  componentWillUnmount() { clearTimeout(this._t); }
+
+  applyChrome() {
+    const r = this.rootRef.current;
+    if (!r) return;
+    const { filter } = this.state;
+    r.querySelectorAll("[data-act-type]").forEach((el) => {
+      el.style.display = filter === "all" || el.dataset.actType === filter ? "" : "none";
+    });
+  }
+
+  toast(msg) {
+    clearTimeout(this._t);
+    this.setState({ toast: msg });
+    this._t = setTimeout(() => this.setState({ toast: "" }), 2800);
+  }
+
+  renderVals() {
+    const { tab, step, filter, toast, blockerOpen, blocked, doneReq } = this.state;
+    const remaining = this.reqTotal - doneReq;
+    const cap = (s) => s[0].toUpperCase() + s.slice(1);
+    const st = {};
+    ["overview", "qa", "history"].forEach((t) => {
+      const on = tab === t, K = cap(t);
+      st["tb" + K] = on ? "var(--color-primary-600)" : "transparent";
+      st["tw" + K] = on ? "600" : "500";
+      st["tc" + K] = on ? "var(--color-primary-700)" : "var(--text-muted)";
+    });
+    ["debug", "fix", "review", "test", "complete"].forEach((s) => {
+      const on = step === s, K = cap(s);
+      st["sb" + K] = on ? "var(--color-primary-600)" : "var(--border-subtle)";
+      st["ss" + K] = on ? "0 0 0 1px var(--color-primary-600)" : "none";
+    });
+    ["all", "workflow", "code", "test", "comment"].forEach((f) => {
+      const on = filter === f, K = cap(f);
+      st["fb" + K] = on ? "var(--accent-soft)" : "transparent";
+      st["fc" + K] = on ? "var(--color-primary-700)" : "var(--text-muted)";
+      st["fbc" + K] = on ? "color-mix(in srgb, var(--color-primary-600) 35%, transparent)" : "var(--border-subtle)";
+    });
+    const setTab = (t) => () => this.setState({ tab: t });
+    const setStep = (s) => () => this.setState({ step: s });
+    const setFilter = (f) => () => this.setState({ filter: f });
+    return Object.assign(st, {
+      rootRef: this.rootRef,
+      isOverview: tab === "overview", isQa: tab === "qa", isHistory: tab === "history",
+      isDebug: step === "debug", isFix: step === "fix", isReview: step === "review",
+      isTest: step === "test", isComplete: step === "complete",
+      goOverview: setTab("overview"), goQa: setTab("qa"),
+      goHistory: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ tab: "history" }); },
+      goDebug: setStep("debug"), goFix: setStep("fix"), goReview: setStep("review"),
+      goTest: setStep("test"), goComplete: setStep("complete"),
+      filterAll: setFilter("all"), filterWorkflow: setFilter("workflow"), filterCode: setFilter("code"),
+      filterTest: setFilter("test"), filterComment: setFilter("comment"),
+      notReady: remaining > 0,
+      remainingLabel: remaining > 0 ? remaining + " of " + this.reqTotal + " required conditions remaining" : "All required conditions complete",
+      readyHint: remaining > 0 ? "Complete every required condition to move to Review" : "Ready to hand over to Review",
+      blockerOpen, blocked,
+      hasToast: !!toast, toast,
+      onCheck: (e) => {
+        const box = e.currentTarget;
+        const done = Array.prototype.filter.call(box.querySelectorAll("input[data-req]"), (i) => i.checked).length;
+        this.setState({ doneReq: done });
+      },
+      onMarkReady: () => { this.setState({ tab: "overview", step: "review" }); this.toast("Marked ready for review · Review attempt 2 created"); },
+      openBlocker: () => this.setState({ blockerOpen: true }),
+      closeBlocker: () => this.setState({ blockerOpen: false }),
+      submitBlocker: () => { this.setState({ blockerOpen: false, blocked: true }); this.toast("Blocker reported · Issue status set to Blocked"); },
+      toastCopy: () => this.toast("Link copied to clipboard"),
+      toastBack: () => this.toast("Returning to the issue list"),
+      toastMenu: () => this.toast("More actions: Watch, Move, Duplicate, Archive"),
+      toastAi: () => this.toast("AI risk check queued · result in a few seconds"),
+      toastReportCheck: () => this.toast("AI report check re-run · 2 gaps found"),
+      toastExport: () => this.toast("Report export started as PDF"),
+      toastReopen: () => this.toast("Reopen requires a closed issue"),
+    });
+  }
+}
+</script>
+</body>
+</html>

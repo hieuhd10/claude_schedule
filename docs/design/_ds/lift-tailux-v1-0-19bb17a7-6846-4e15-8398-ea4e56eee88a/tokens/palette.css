@@ -1,0 +1,127 @@
+/* Primitive ramps, derived from the LIFT logo.
+
+   The mark is a single left-to-right gradient — gold #FFE253 → rose #EB6B91 —
+   and the wordmark is set in a warm soft black #3F3B3A. Those three values
+   generate the whole system: rose becomes primary, gold becomes secondary, the
+   gradient's amber and coral mid-stops become warning and error, and #3F3B3A
+   anchors both neutral ramps so every grey in the product is warm, never blue.
+
+   The eight gradient stops are reproduced verbatim in --gradient-brand. */
+:root {
+  /* --- Brand gradient (verbatim from assets/logo/lift-logo.svg) --- */
+  --brand-gold: #ffe253;
+  --brand-gold-deep: #fcd559;
+  --brand-amber: #f7b46a;
+  --brand-apricot: #f29978;
+  --brand-coral: #ef8583;
+  --brand-blush: #ec768b;
+  --brand-rose-light: #eb6d8f;
+  --brand-rose: #eb6b91;
+  --brand-ink: #3f3b3a;
+  --gradient-brand: linear-gradient(90deg, #ffe253 0%, #fcd559 4%, #f7b46a 15%, #f29978 27%, #ef8583 40%, #ec768b 55%, #eb6d8f 73%, #eb6b91 100%); /* @kind color */
+  --gradient-brand-diagonal: linear-gradient(135deg, #ffe253 0%, #f7b46a 22%, #ef8583 55%, #eb6b91 100%); /* @kind color */
+  /* For panels that carry white text — the rose half only, so contrast holds. */
+  --gradient-brand-deep: linear-gradient(135deg, #eb6b91 0%, #dc4b78 45%, #a02f56 100%); /* @kind color */
+
+  /* --- Neutral ramp: warm greys built around the wordmark ink at 800 --- */
+  --color-gray-50: #faf9f9;
+  --color-gray-100: #f4f2f2;
+  --color-gray-150: #eeebea;
+  --color-gray-200: #e6e2e1;
+  --color-gray-300: #d3cecc;
+  --color-gray-400: #aba4a2;
+  --color-gray-500: #837b79;
+  --color-gray-600: #635b59;
+  --color-gray-700: #4e4847;
+  --color-gray-800: #3f3b3a;  /* the logo ink */
+  --color-gray-900: #2e2b2a;
+  --color-gray-950: #1c1a19;
+
+  /* --- Dark ramp: the same warm axis, driven down. 50 lightest, 900 deepest --- */
+  --color-dark-50: #edeae9;
+  --color-dark-100: #dcd8d6;
+  --color-dark-200: #c4bfbd;
+  --color-dark-300: #8f8886;
+  --color-dark-400: #56504e;
+  --color-dark-450: #423d3c;
+  --color-dark-500: #332f2e;
+  --color-dark-600: #2b2827;
+  --color-dark-700: #232120;
+  --color-dark-750: #201e1d;
+  --color-dark-800: #1a1817;
+  --color-dark-900: #121110;
+
+  /* --- Primary: the gradient's rose terminus. 500 is the logo colour exactly;
+         600 is the action fill, deepened so white text clears contrast. --- */
+  --color-primary-50: #fdf3f6;
+  --color-primary-100: #fce5ec;
+  --color-primary-200: #f8ccda;
+  --color-primary-300: #f4a8bf;
+  --color-primary-400: #ef87a5;
+  --color-primary-500: #eb6b91;  /* the logo rose */
+  --color-primary-600: #dc4b78;
+  --color-primary-700: #c03562;
+  --color-primary-800: #9e2c51;
+  --color-primary-900: #832845;
+  --color-primary-950: #4a1225;
+
+  /* --- Semantic accents. Each is lighter / light / base / darker; `darker` is
+         always the step that stays legible as text on a light surface. --- */
+
+  /* Secondary — the gradient's gold terminus. #ffe253 sits at `light`, because
+     a pure logo yellow cannot carry white text as a fill. */
+  --color-secondary-lighter: #ffe97a;
+  --color-secondary-light: #ffe253;  /* the logo gold */
+  --color-secondary: #f0c400;
+  --color-secondary-darker: #a37f00;
+
+  /* Warning — the gradient's amber mid-stop. */
+  --color-warning-lighter: #f9c88f;
+  --color-warning-light: #f7b46a;
+  --color-warning: #ee9a45;
+  --color-warning-darker: #b96f24;
+
+  /* Error — the gradient's coral mid-stop, pushed red so it never reads as
+     primary rose. */
+  --color-error-lighter: #f5a7a0;
+  --color-error-light: #f08a80;
+  --color-error: #e4574b;
+  --color-error-darker: #bd382d;
+
+  /* Info and success have no counterpart in the logo — see readme.md
+     "Intentional additions". Both are desaturated toward the warm palette so
+     they sit beside the brand hues instead of fighting them. */
+  --color-info-lighter: #6bc5e8;
+  --color-info-light: #35a9d8;
+  --color-info: #1b8cbc;
+  --color-info-darker: #146f97;
+
+  --color-success-lighter: #6fcf9a;
+  --color-success-light: #3fb878;
+  --color-success: #2e9a61;
+  --color-success-darker: #21774a;
+
+  /* `this` — the runtime colour slot. Every colourable component reads --this,
+     and data-color rebinds the slot. Defaults to primary. */
+  --this-lighter: var(--color-primary-400);
+  --this-light: var(--color-primary-500);
+  --this: var(--color-primary-600);
+  --this-darker: var(--color-primary-700);
+  /* Foreground for anything filled with --this. Gold and amber flip it to ink;
+     never write `color: #fff` against an accent fill directly. */
+  --on-this: #ffffff;
+
+  /* Elevated dark surfaces, driven by card skin. Light mode never uses these. */
+  --surface-1: var(--color-dark-450);
+  --surface-2: var(--color-dark-500);
+  --surface-3: var(--color-dark-600);
+}
+
+/* Colour-slot variants. Put data-color="<name>" on any colourable element; every
+   descendant then reads the rebound slot. */
+[data-color="primary"] { --this-lighter: var(--color-primary-400); --this-light: var(--color-primary-500); --this: var(--color-primary-600); --this-darker: var(--color-primary-700) }
+[data-color="secondary"] { --this-lighter: var(--color-secondary-lighter); --this-light: var(--color-secondary-light); --this: var(--color-secondary); --this-darker: var(--color-secondary-darker); --on-this: var(--color-gray-900) }
+[data-color="info"] { --this-lighter: var(--color-info-lighter); --this-light: var(--color-info-light); --this: var(--color-info); --this-darker: var(--color-info-darker) }
+[data-color="success"] { --this-lighter: var(--color-success-lighter); --this-light: var(--color-success-light); --this: var(--color-success); --this-darker: var(--color-success-darker) }
+[data-color="warning"] { --this-lighter: var(--color-warning-lighter); --this-light: var(--color-warning-light); --this: var(--color-warning); --this-darker: var(--color-warning-darker); --on-this: var(--color-gray-900) }
+[data-color="error"] { --this-lighter: var(--color-error-lighter); --this-light: var(--color-error-light); --this: var(--color-error); --this-darker: var(--color-error-darker) }

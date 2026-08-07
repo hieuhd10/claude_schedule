@@ -1,0 +1,17 @@
+/* Motion is short and functional. 200ms is the house transition; nothing
+   bounces, nothing overshoots. `--ease-elastic` is the one expressive curve and
+   it is used only on indeterminate loaders (spinner, progress, skeleton wave). */
+:root {
+  --duration-fast: 150ms; /* @kind other */
+  --duration-base: 200ms; /* @kind other */   /* buttons, inputs, hovers, nav items */
+  --duration-content: 250ms; /* @kind other */ /* sidebar open/close, layout width shifts */
+  --duration-slow: 400ms; /* @kind other */
+
+  --ease-in: cubic-bezier(0.4, 0, 1, 1); /* @kind other */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1); /* @kind other */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); /* @kind other */
+  --ease-elastic: cubic-bezier(0.53, 0.21, 0.29, 0.67); /* @kind other */
+
+  --transition-control: all var(--duration-base) var(--ease-in-out); /* @kind other */
+  --transition-color: color var(--duration-base) var(--ease-in-out), background-color var(--duration-base) var(--ease-in-out), border-color var(--duration-base) var(--ease-in-out); /* @kind other */
+}

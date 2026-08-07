@@ -1,0 +1,66 @@
+/* Themes. Tailux ships three axes the user can switch at runtime:
+     data-theme-light  slate | gray | neutral        (neutral ramp)
+     data-theme-dark   cinder | navy | mirage | mint | black
+     data-theme-primary indigo | blue | green | amber | purple | rose
+   plus a card skin (`bordered` vs `shadow`) that shifts the dark surface stack.
+   Only the shipped defaults (slate / cinder / indigo) are expanded below;
+   the alternates are listed in readme.md. */
+
+.dark {
+  color-scheme: dark;
+
+  --bg-page: var(--color-dark-900);
+  --surface-card: var(--color-dark-700);
+  --surface-raised: var(--color-dark-700);
+  --surface-sunken: var(--color-dark-800);
+  --surface-inset: var(--color-dark-600);
+  --surface-header: rgb(18 17 16 / 0.8);
+  --surface-sidebar: var(--color-dark-750);
+  --surface-popover: var(--color-dark-700);
+  --surface-overlay: rgb(18 17 16 / 0.6);
+
+  --text-strong: var(--color-dark-50);
+  --text-heading: var(--color-dark-100);
+  --text-body: var(--color-dark-200);
+  --text-muted: var(--color-dark-200);
+  --text-subtle: var(--color-dark-300);
+  --text-link: var(--color-primary-400);
+  --text-link-hover: var(--color-primary-600);
+
+  --border-subtle: var(--color-dark-600);
+  --border-default: var(--color-dark-450);
+  --border-strong: var(--color-dark-400);
+  --border-focus: var(--color-primary-500);
+  --divider: var(--color-dark-500);
+
+  --accent-solid: var(--color-primary-600);
+  --accent-solid-hover: var(--color-primary-700);
+  --accent-soft: color-mix(in srgb, var(--color-primary-400) 12%, transparent);
+  --accent-soft-hover: color-mix(in srgb, var(--color-primary-400) 22%, transparent);
+  --accent-text: var(--color-primary-400);
+
+  --text-success: var(--color-success-lighter);
+  --text-warning: var(--color-warning-lighter);
+  --text-error: var(--color-error-lighter);
+  --text-info: var(--color-info-lighter);
+
+  --sk-color: var(--color-dark-400);
+
+  --elevation-card: none;
+  --elevation-popover: none;
+}
+
+/* Card skin `bordered`: cards lose their shadow and gain a hairline; the page
+   flips to pure white / dark-900 and the dark surface stack lifts one step. */
+[data-card-skin="bordered"] {
+  --surface-1: var(--color-dark-500);
+  --surface-2: var(--color-dark-600);
+  --surface-3: var(--color-dark-700);
+  --bg-page: #ffffff;
+}
+
+[data-card-skin="bordered"].dark {
+  --bg-page: var(--color-dark-900);
+  --surface-card: var(--color-dark-900);
+  --surface-sidebar: var(--color-dark-900);
+}

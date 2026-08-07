@@ -1,0 +1,19 @@
+/* Tailux has exactly one signature elevation: `shadow-soft`. It is a cool grey
+   double shadow (a 2px contact ring + a wide 24px lift) that reads as paper on
+   a grey desk. Dark mode drops it almost entirely — depth there comes from
+   surface value, not shadow. */
+:root {
+  --shadow-soft: rgba(63, 59, 58, 0.14) 0px 0px 2px 0px, rgba(63, 59, 58, 0.1) 0px 12px 24px -4px;
+  --shadow-soft-dark: 0 3px 10px 0 rgb(18 17 16 / 40%);
+
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Menus and popovers use a tinted grey lift rather than a black one */
+  --shadow-menu: 0 10px 15px -3px rgb(63 59 58 / 0.1), 0 4px 6px -4px rgb(63 59 58 / 0.08);
+
+  --elevation-card: var(--shadow-soft);
+  --elevation-popover: var(--shadow-menu);
+  --elevation-header: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}

@@ -1,0 +1,8 @@
+<svg width="24.288" height="24.644" viewBox="0 0 24.288 24.644" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M16.3064 16.6805L24.288 8.8539V0.355957H0V0.374034L16.3064 16.6805Z" fill="url(#liftMarkA)"></path>
+<path d="M16.0741 22.1003L0 6.02628V24.6438H24.288V14.0104L16.0741 22.1003Z" fill="url(#liftMarkB)"></path>
+<defs>
+<linearGradient id="liftMarkA" x1="0" y1="8.51822" x2="24.288" y2="8.51822" gradientUnits="userSpaceOnUse"><stop stop-color="#FFE253"></stop><stop offset="0.04" stop-color="#FCD559"></stop><stop offset="0.15" stop-color="#F7B46A"></stop><stop offset="0.27" stop-color="#F29978"></stop><stop offset="0.4" stop-color="#EF8583"></stop><stop offset="0.55" stop-color="#EC768B"></stop><stop offset="0.73" stop-color="#EB6D8F"></stop><stop offset="1" stop-color="#EB6B91"></stop></linearGradient>
+<linearGradient id="liftMarkB" x1="0" y1="15.335" x2="24.288" y2="15.335" gradientUnits="userSpaceOnUse"><stop stop-color="#FFE253"></stop><stop offset="0.04" stop-color="#FCD559"></stop><stop offset="0.15" stop-color="#F7B46A"></stop><stop offset="0.27" stop-color="#F29978"></stop><stop offset="0.4" stop-color="#EF8583"></stop><stop offset="0.55" stop-color="#EC768B"></stop><stop offset="0.73" stop-color="#EB6D8F"></stop><stop offset="1" stop-color="#EB6B91"></stop></linearGradient>
+</defs>
+</svg>
