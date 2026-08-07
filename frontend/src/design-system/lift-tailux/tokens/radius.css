@@ -1,0 +1,17 @@
+/* Tailux is a two-radius system in practice: `lg` (8px) for anything you can
+   click or that holds content, `full` for anything round. `sm` (4px) is
+   reserved for badges/tags, which stay deliberately squarer than buttons. */
+:root {
+  --radius-none: 0px;
+  --radius-xs: 0.125rem;  /* 2 */
+  --radius-sm: 0.25rem;   /* 4 — badge, tag, checkbox */
+  --radius-md: 0.375rem;  /* 6 */
+  --radius-lg: 0.5rem;    /* 8 — button, input, card, menu, nav item */
+  --radius-xl: 0.75rem;   /* 12 */
+  --radius-2xl: 1rem;     /* 16 */
+  --radius-full: 9999px;  /* avatar, switch, progress rail, icon button, pill */
+
+  --radius-control: var(--radius-lg);
+  --radius-card: var(--radius-lg);
+  --radius-pill: var(--radius-full);
+}

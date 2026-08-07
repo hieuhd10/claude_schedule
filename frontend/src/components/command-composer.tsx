@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { Badge, Button } from "../design-system/lift-tailux";
+
 import type { Comment, PullRequest, Stage } from "../api/types";
 import { usePostComment } from "../hooks/use-post-comment";
 import { STAGE_ACTIONS } from "../lib/quick-actions";
@@ -69,11 +71,13 @@ export function CommandComposer({
     <section className="command-composer">
       <div className="command-composer__heading">
         <div>
-          <span className="eyebrow">Current stage action</span>
+          <span className="t-overline">Current Stage Action</span>
           <h2>{action.title}</h2>
           <p>{action.description}</p>
         </div>
-        <span className="command-composer__destination">Posts to {destination}</span>
+        <Badge component="span" variant="soft" color="primary">
+          Posts to {destination}
+        </Badge>
       </div>
 
       <div className="command-composer__mode-tabs" role="tablist" aria-label="Comment mode">
@@ -124,23 +128,22 @@ export function CommandComposer({
         />
 
         {!confirming ? (
-          <button
-            className="button button--primary"
-            type="button"
+          <Button
+            color="primary"
             disabled={!canPost || submitting || !body.trim()}
             onClick={() => setConfirming(true)}
           >
-            {mode === "manual" ? "Review manual comment" : "Review Claude prompt"}
-          </button>
+            {mode === "manual" ? "Review Manual Comment" : "Review Claude Prompt"}
+          </Button>
         ) : (
           <div className="command-composer__confirm">
-            <span>Post this comment to {destination}?</span>
-            <button className="button button--primary" type="button" onClick={handleConfirmPost} disabled={submitting}>
-              {submitting ? "Posting…" : "Confirm and post"}
-            </button>
-            <button className="button button--ghost" type="button" onClick={() => setConfirming(false)} disabled={submitting}>
+            <span className="t-body">Post this comment to {destination}?</span>
+            <Button color="primary" onClick={handleConfirmPost} disabled={submitting}>
+              {submitting ? "Posting…" : "Confirm And Post"}
+            </Button>
+            <Button variant="flat" onClick={() => setConfirming(false)} disabled={submitting}>
               Cancel
-            </button>
+            </Button>
           </div>
         )}
 

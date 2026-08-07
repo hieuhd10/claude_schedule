@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { Button } from "../design-system/lift-tailux";
+
 import type { Comment, Stage } from "../api/types";
 import { usePostComment } from "../hooks/use-post-comment";
 import { DEBUG_APPROVAL_ACTION } from "../lib/checkpoints";
@@ -31,9 +33,8 @@ export function CheckpointPanel({
         Once the investigation is accepted, record approval to move this issue into Fix.
       </p>
       <div className="checkpoint-panel__actions">
-        <button
-          type="button"
-          className="checkpoint-panel__action--relevant"
+        <Button
+          color="primary"
           disabled={submitting}
           onClick={async () => {
             const comment = await submitCheckpoint(
@@ -48,8 +49,8 @@ export function CheckpointPanel({
             }
           }}
         >
-          {submitting ? "Recording…" : "Approve debug and start Fix"}
-        </button>
+          {submitting ? "Recording…" : "Approve Debug And Start Fix"}
+        </Button>
       </div>
       {error && <div className="status-banner status-banner--error">{error.message}</div>}
       {lastPostedUrl && (

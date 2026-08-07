@@ -1,0 +1,63 @@
+/* A small utility layer, named exactly like the Tailwind classes the Tailux
+   source uses, so examples and UI kits are copy-pasteable in a plain page.
+   This is NOT a Tailwind reimplementation — only the handful of primitives the
+   kit's own components and screens reach for. */
+
+/* type */
+.text-tiny{font-size:var(--text-tiny);line-height:var(--text-tiny--line-height)}
+.text-tiny-plus{font-size:var(--text-tiny-plus);line-height:var(--text-tiny-plus--line-height)}
+.text-xs{font-size:var(--text-xs);line-height:var(--text-xs--line-height)}
+.text-xs-plus{font-size:var(--text-xs-plus);line-height:var(--text-xs-plus--line-height)}
+.text-sm{font-size:var(--text-sm);line-height:1.25rem}
+.text-sm-plus{font-size:var(--text-sm-plus);line-height:var(--text-sm-plus--line-height)}
+.text-base{font-size:var(--text-base);line-height:var(--text-base--line-height)}
+.text-lg{font-size:var(--text-lg);line-height:var(--text-lg--line-height)}
+.text-xl{font-size:var(--text-xl);line-height:var(--text-xl--line-height)}
+.text-2xl{font-size:var(--text-2xl);line-height:var(--text-2xl--line-height)}
+.text-3xl{font-size:var(--text-3xl);line-height:var(--text-3xl--line-height)}
+.font-normal{font-weight:400}.font-medium{font-weight:500}.font-semibold{font-weight:600}.font-bold{font-weight:700}
+.tracking-wide{letter-spacing:var(--tracking-wide)}.tracking-wider{letter-spacing:var(--tracking-wider)}
+.uppercase{text-transform:uppercase}
+.text-strong{color:var(--text-strong)}.text-heading{color:var(--text-heading)}.text-muted{color:var(--text-muted)}.text-subtle{color:var(--text-subtle)}
+.text-accent{color:var(--accent-text)}.text-success{color:var(--text-success)}.text-warning{color:var(--text-warning)}.text-error{color:var(--text-error)}
+.text-white{color:#fff}
+.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.leading-none{line-height:1}
+
+/* box */
+.rounded-sm{border-radius:var(--radius-sm)}.rounded-md{border-radius:var(--radius-md)}.rounded-lg{border-radius:var(--radius-lg)}
+.rounded-xl{border-radius:var(--radius-xl)}.rounded-2xl{border-radius:var(--radius-2xl)}.rounded-full{border-radius:var(--radius-full)}
+.border{border:1px solid var(--border-subtle)}.border-t{border-top:1px solid var(--border-subtle)}
+.border-b{border-bottom:1px solid var(--border-subtle)}.border-y{border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle)}
+.border-2{border-width:2px}.border-3{border-width:3px}
+.bg-card{background-color:var(--surface-card)}.bg-page{background-color:var(--bg-page)}.bg-inset{background-color:var(--surface-inset)}
+.bg-sunken{background-color:var(--surface-sunken)}.bg-accent{background-color:var(--accent-solid)}.bg-accent-soft{background-color:var(--accent-soft)}
+.shadow-soft{box-shadow:var(--shadow-soft)}.shadow-menu{box-shadow:var(--shadow-menu)}
+
+/* size — spacing-step scale, n/4 rem */
+.size-3{width:.75rem;height:.75rem}.size-3-5{width:.875rem;height:.875rem}.size-4{width:1rem;height:1rem}
+.size-4-5{width:1.125rem;height:1.125rem}.size-5{width:1.25rem;height:1.25rem}.size-5-5{width:1.375rem;height:1.375rem}
+.size-6{width:1.5rem;height:1.5rem}.size-7{width:1.75rem;height:1.75rem}.size-8{width:2rem;height:2rem}
+.size-9{width:2.25rem;height:2.25rem}.size-10{width:2.5rem;height:2.5rem}.size-11{width:2.75rem;height:2.75rem}
+.size-12{width:3rem;height:3rem}.size-14{width:3.5rem;height:3.5rem}.size-16{width:4rem;height:4rem}
+.h-1{height:.25rem}.h-1-5{height:.375rem}.h-2{height:.5rem}.h-3{height:.75rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-10{height:2.5rem}
+.w-full{width:100%}.h-full{height:100%}.min-w-0{min-width:0}
+
+/* layout */
+.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.block{display:block}
+.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}
+.items-center{align-items:center}.items-start{align-items:flex-start}.items-end{align-items:flex-end}
+.justify-center{justify-content:center}.justify-between{justify-content:space-between}.justify-end{justify-content:flex-end}
+.gap-1{gap:.25rem}.gap-1-5{gap:.375rem}.gap-2{gap:.5rem}.gap-2-5{gap:.625rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}
+.relative{position:relative}.absolute{position:absolute}.sticky{position:sticky}
+
+/* spacing */
+.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}
+.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}
+.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}
+.pt-3{padding-top:.75rem}.pb-3{padding-bottom:.75rem}.pb-4{padding-bottom:1rem}
+.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}
+.mb-2{margin-bottom:.5rem}.mb-4{margin-bottom:1rem}
+.space-y-1>*+*{margin-top:.25rem}.space-y-2>*+*{margin-top:.5rem}.space-y-3>*+*{margin-top:.75rem}
+.space-y-4>*+*{margin-top:1rem}.space-y-5>*+*{margin-top:1.25rem}.space-y-6>*+*{margin-top:1.5rem}

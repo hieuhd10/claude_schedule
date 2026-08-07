@@ -73,8 +73,27 @@ export interface ParsedClaudeResponse {
   raw_body: string;
   is_structured: boolean;
   root_cause: string | null;
+  solution: string | null;
   findings: string[];
   test_result: string | null;
+  remaining_risk: string | null;
+  summary: string | null;
+  html_url: string | null;
+}
+
+export interface StageReport {
+  stage: Stage;
+  actor: string | null;
+  recorded_at: string | null;
+  response: ParsedClaudeResponse;
+}
+
+export interface StageOwner {
+  stage: Stage;
+  actor: string | null;
+  role: string;
+  recorded_at: string | null;
+  source_url: string | null;
 }
 
 export interface LifecycleResult {
@@ -84,7 +103,12 @@ export interface LifecycleResult {
   last_claude_response: ParsedClaudeResponse | null;
   next_recommended_action: string;
   review_findings: string[];
+  review_result: string | null;
   test_result: string | null;
+  debug_approved: boolean;
+  checks_green: boolean;
+  stage_owners: StageOwner[];
+  stage_reports: StageReport[];
 }
 
 export type ActivityCategory =
@@ -113,12 +137,40 @@ export interface IssueDetailResponse {
   lifecycle: LifecycleResult;
 }
 
-export type Checkpoint =
-  | "DEBUG_APPROVED"
-  | "PR_READY_FOR_REVIEW"
-  | "REVIEW_CONFIRMED"
-  | "TEST_CONFIRMED"
-  | "PR_MERGED";
+export type Checkpoint = "DEBUG_APPROVED";
+
+export interface FixBranchesResponse {
+  base_branch: string;
+  branches: string[];
+}
+
+export interface CreatePullRequestRequest {
+  head: string;
+  base?: string | null;
+  title?: string | null;
+}
+
+export interface CreatePullRequestResponse {
+  pull_request: PullRequest;
+}
+
+export type MergeMethod = "merge" | "squash" | "rebase";
+
+export const MERGE_METHODS: MergeMethod[] = ["squash", "merge", "rebase"];
+
+export const MERGE_METHOD_LABELS: Record<MergeMethod, string> = {
+  squash: "Squash and merge",
+  merge: "Create a merge commit",
+  rebase: "Rebase and merge",
+};
+
+export interface MergePullRequestResponse {
+  pull_request: PullRequest;
+}
+
+export interface CloseIssueResponse {
+  issue: Issue;
+}
 
 export interface ConfigResponse {
   owner: string;

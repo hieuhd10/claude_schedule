@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { createIssue, getConfig } from "../api/client";
+import { Button } from "../design-system/lift-tailux";
 import type { Issue } from "../api/types";
 
 interface IssueCreateFormProps {
@@ -81,23 +82,23 @@ export function IssueCreateForm({ onCreated }: IssueCreateFormProps) {
       <div className="issue-create-form__row">
         <label>
           Owner *
-          <input value={owner} onChange={(e) => setOwner(e.target.value)} required />
+          <input className="form-input-base form-input" value={owner} onChange={(e) => setOwner(e.target.value)} required />
         </label>
         <label>
           Repository *
-          <input value={repository} onChange={(e) => setRepository(e.target.value)} required />
+          <input className="form-input-base form-input" value={repository} onChange={(e) => setRepository(e.target.value)} required />
         </label>
       </div>
 
       <label>
         Title *
-        <input value={title} maxLength={256} onChange={(e) => setTitle(e.target.value)} required />
+        <input className="form-input-base form-input" value={title} maxLength={256} onChange={(e) => setTitle(e.target.value)} required />
       </label>
 
       <div className="issue-create-form__row">
         <label>
           Environment
-          <input
+          <input className="form-input-base form-input"
             placeholder="dev / staging / prod"
             maxLength={46}
             value={environment}
@@ -106,7 +107,7 @@ export function IssueCreateForm({ onCreated }: IssueCreateFormProps) {
         </label>
         <label>
           Base branch
-          <input
+          <input className="form-input-base form-input"
             placeholder="develop"
             maxLength={45}
             value={baseBranch}
@@ -115,7 +116,7 @@ export function IssueCreateForm({ onCreated }: IssueCreateFormProps) {
         </label>
         <label>
           Severity
-          <select value={severity} onChange={(e) => setSeverity(e.target.value)}>
+          <select className="form-select-base form-select" value={severity} onChange={(e) => setSeverity(e.target.value)}>
             {SEVERITIES.map((level) => (
               <option key={level} value={level}>
                 {level}
@@ -127,7 +128,7 @@ export function IssueCreateForm({ onCreated }: IssueCreateFormProps) {
 
       <label>
         Steps to Reproduce *
-        <textarea
+        <textarea className="form-textarea-base form-textarea"
           rows={4}
           placeholder={"1. ...\n2. ...\n3. ..."}
           value={stepsToReproduce}
@@ -138,7 +139,7 @@ export function IssueCreateForm({ onCreated }: IssueCreateFormProps) {
 
       <label>
         Expected Result *
-        <textarea
+        <textarea className="form-textarea-base form-textarea"
           rows={2}
           value={expectedResult}
           onChange={(e) => setExpectedResult(e.target.value)}
@@ -148,7 +149,7 @@ export function IssueCreateForm({ onCreated }: IssueCreateFormProps) {
 
       <label>
         Actual Result *
-        <textarea
+        <textarea className="form-textarea-base form-textarea"
           rows={2}
           value={actualResult}
           onChange={(e) => setActualResult(e.target.value)}
@@ -158,7 +159,7 @@ export function IssueCreateForm({ onCreated }: IssueCreateFormProps) {
 
       <label>
         Additional Notes
-        <textarea
+        <textarea className="form-textarea-base form-textarea"
           rows={2}
           value={additionalNotes}
           onChange={(e) => setAdditionalNotes(e.target.value)}
@@ -167,12 +168,12 @@ export function IssueCreateForm({ onCreated }: IssueCreateFormProps) {
 
       <label>
         Assignee (GitHub username, optional)
-        <input value={assignee} onChange={(e) => setAssignee(e.target.value)} />
+        <input className="form-input-base form-input" value={assignee} onChange={(e) => setAssignee(e.target.value)} />
       </label>
 
-      <button type="submit" disabled={!canSubmit || submitting}>
+      <Button type="submit" color="primary" disabled={!canSubmit || submitting}>
         {submitting ? "Creating…" : "Create GitHub Issue"}
-      </button>
+      </Button>
 
       {error && <div className="status-banner status-banner--error">{error.message}</div>}
       {createdIssue && (

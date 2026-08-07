@@ -1,0 +1,4 @@
+/* Tailux ships no font binaries — Inter is loaded from Google Fonts, exactly as the
+   source template does in its index.html (<link href="…family=Inter…">).
+   Variable font, optical sizing 14..32, weights 100..900, upright + italic. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");

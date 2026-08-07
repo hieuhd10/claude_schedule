@@ -1,43 +1,62 @@
 import { STAGE_LABELS, STAGES, type Stage } from "../api/types";
+import { Avatar, Badge } from "../design-system/lift-tailux";
+import { STEP_STATE_COLORS } from "../lib/ds-colors";
+import { stageOwner, stepState, type LifecycleSignals, type StepState } from "../lib/lifecycle-progress";
 
 interface LifecycleStepperProps {
-  currentStage: Stage;
+  signals: LifecycleSignals;
+  selectedStage: Stage;
+  onSelect: (stage: Stage) => void;
 }
-
-type StepState = "done" | "current" | "upcoming";
-
-const STEP_ICON: Record<StepState, string> = {
-  done: "✓",
-  current: "●",
-  upcoming: "○",
-};
 
 const STEP_CAPTION: Record<StepState, string> = {
   done: "Completed",
-  current: "In progress",
-  upcoming: "Waiting",
+  current: "In Progress",
+  waiting: "Waiting",
 };
 
-export function LifecycleStepper({ currentStage }: LifecycleStepperProps) {
-  const currentIndex = STAGES.indexOf(currentStage);
-  const isLifecycleComplete = currentStage === "completed";
-
+export function LifecycleStepper({ signals, selectedStage, onSelect }: LifecycleStepperProps) {
   return (
     <ol className="lifecycle-stepper">
       {STAGES.map((stage, index) => {
-        let state: StepState = "upcoming";
-        if (isLifecycleComplete || index < currentIndex) state = "done";
-        else if (index === currentIndex) state = "current";
+        const state = stepState(stage, signals);
+        const owner = stageOwner(signals.lifecycle, stage);
+        const selected = stage === selectedStage;
 
         return (
-          <li key={stage} className={`lifecycle-stepper__step lifecycle-stepper__step--${state}`}>
-            <span className="lifecycle-stepper__icon" aria-hidden="true">
-              {STEP_ICON[state]}
-            </span>
-            <span className="lifecycle-stepper__text">
-              <span className="lifecycle-stepper__label">{STAGE_LABELS[stage]}</span>
-              <span className="lifecycle-stepper__caption">{STEP_CAPTION[state]}</span>
-            </span>
+          <li key={stage} className="lifecycle-stepper__item">
+            <button
+              type="button"
+              aria-pressed={selected}
+              onClick={() => onSelect(stage)}
+              className={`lifecycle-stepper__step${selected ? " is-selected" : ""}`}
+            >
+              <span className="lifecycle-stepper__head">
+                <span
+                  className={`lifecycle-stepper__marker lifecycle-stepper__marker--${state}`}
+                  aria-hidden="true"
+                >
+                  {state === "done" ? "✓" : index + 1}
+                  {state === "current" && <span className="animate-ping" />}
+                </span>
+                <span className="lifecycle-stepper__label">{STAGE_LABELS[stage]}</span>
+              </span>
+
+              <Badge component="span" variant="soft" color={STEP_STATE_COLORS[state]}>
+                {STEP_CAPTION[state]}
+              </Badge>
+
+              <span className="lifecycle-stepper__owner">
+                {owner?.actor ? (
+                  <>
+                    <Avatar name={owner.actor} size={5} initialColor="auto" initialVariant="soft" />
+                    <span className="t-tiny">{owner.actor}</span>
+                  </>
+                ) : (
+                  <span className="t-tiny">No owner yet</span>
+                )}
+              </span>
+            </button>
           </li>
         );
       })}

@@ -1,92 +1,104 @@
+import { STAGES, STAGE_LABELS, type Issue, type LifecycleResult, type PullRequest } from "../api/types";
+import { Avatar, Badge, Card } from "../design-system/lift-tailux";
+import { formatDateTime, relativeTime } from "../lib/format-time";
+import { issueSummary } from "../lib/parse-issue-body";
 import { parseLabelMetadata } from "../lib/parse-labels";
-import type { Issue, PullRequest } from "../api/types";
+import { SEVERITY_COLORS } from "../lib/ds-colors";
 
 interface IssueHeaderProps {
-  owner: string;
-  repository: string;
   issue: Issue;
+  lifecycle: LifecycleResult;
   linkedPullRequest: PullRequest | null;
-  onRefresh: () => void;
-  refreshing: boolean;
 }
 
-function initials(name: string): string {
-  return name.slice(0, 2).toUpperCase();
-}
-
-export function IssueHeader({
-  owner,
-  repository,
-  issue,
-  linkedPullRequest,
-  onRefresh,
-  refreshing,
-}: IssueHeaderProps) {
-  const { environment, baseBranch, status, otherLabels } = parseLabelMetadata(issue.labels);
-  const effectiveBaseBranch = baseBranch ?? linkedPullRequest?.base_branch ?? null;
+export function IssueHeader({ issue, lifecycle, linkedPullRequest }: IssueHeaderProps) {
+  const { severity, status, otherLabels } = parseLabelMetadata(issue.labels);
+  const summary = issueSummary(issue.body);
+  const stepNumber = STAGES.indexOf(lifecycle.stage) + 1;
 
   return (
-    <header className="issue-header">
-      <div className="issue-header__top">
-        <div>
-          <div className="issue-header__repo">
-            {owner}/{repository}
-          </div>
-          <h1>
-            {issue.title} <span className="issue-header__number">#{issue.number}</span>
-          </h1>
+    <Card className="issue-summary-card">
+      <div className="issue-summary-card__main">
+        <div className="issue-summary-card__badges">
+          <span className="issue-summary-card__id">#{issue.number}</span>
+          <Badge component="span" variant="soft" color={issue.state === "open" ? "info" : "success"}>
+            {issue.state === "open" ? "Open" : "Closed"}
+          </Badge>
+          <Badge component="span" variant="soft" color="primary">
+            {STAGE_LABELS[lifecycle.stage]}
+          </Badge>
+          {severity && (
+            <Badge component="span" variant="soft" color={SEVERITY_COLORS[severity] ?? "warning"}>
+              {severity} severity
+            </Badge>
+          )}
+          {status && (
+            <Badge component="span" variant="soft">
+              {status}
+            </Badge>
+          )}
+          {otherLabels.map((label) => (
+            <Badge component="span" variant="soft" key={label}>
+              {label}
+            </Badge>
+          ))}
         </div>
-        <button type="button" onClick={onRefresh} disabled={refreshing}>
-          {refreshing ? "Refreshing…" : "Refresh from GitHub"}
-        </button>
+
+        <h1 className="issue-summary-card__title">{issue.title}</h1>
+        {summary && <p className="issue-summary-card__summary">{summary}</p>}
       </div>
 
-      <div className="issue-header__meta">
-        <span className={`badge badge--${issue.state}`}>{issue.state}</span>
-        {environment && <span className="badge">env: {environment}</span>}
-        {effectiveBaseBranch && <span className="badge">base: {effectiveBaseBranch}</span>}
-        {status && <span className="badge">status: {status}</span>}
-        {otherLabels.map((label) => (
-          <span className="badge" key={label}>
-            {label}
-          </span>
-        ))}
-        {linkedPullRequest && (
-          <a
-            className={`badge badge--link badge--${linkedPullRequest.merged ? "closed" : linkedPullRequest.state}`}
-            href={linkedPullRequest.html_url}
-            target="_blank"
-            rel="noreferrer"
-          >
-            PR #{linkedPullRequest.number}
-          </a>
-        )}
-      </div>
-
-      <div className="issue-header__people">
-        <span className="person-chip">
-          <span className="person-chip__avatar">{initials(issue.author)}</span>
-          <span className="person-chip__label">
-            Author <strong>{issue.author}</strong>
-          </span>
-        </span>
-        <span className="person-chip">
-          <span className="person-chip__avatar">{initials(issue.assignee ?? "—")}</span>
-          <span className="person-chip__label">
-            Assignee <strong>{issue.assignee ?? "unassigned"}</strong>
-          </span>
-        </span>
-        <span className="issue-header__timestamp">
-          Created: {new Date(issue.created_at).toLocaleString()}
-        </span>
-        <span className="issue-header__timestamp">
-          Updated: {new Date(issue.updated_at).toLocaleString()}
-        </span>
-      </div>
-
-      <a href={issue.html_url} target="_blank" rel="noreferrer">
-        View on GitHub ↗
-      </a>
-    </header>
+      <dl className="issue-summary-card__facts">
+        <div>
+          <dt className="t-overline">Assignee</dt>
+          <dd>
+            {issue.assignee ? (
+              <span className="owner-chip">
+                <Avatar name={issue.assignee} size={7} initialColor="primary" />
+                <span className="owner-chip__name">{issue.assignee}</span>
+              </span>
+            ) : (
+              <span className="t-caption">Unassigned</span>
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt className="t-overline">Current Step</dt>
+          <dd>
+            <strong>{STAGE_LABELS[lifecycle.stage]}</strong>
+            <span className="t-tiny">
+              Step {stepNumber} of {STAGES.length}
+            </span>
+          </dd>
+        </div>
+        <div>
+          <dt className="t-overline">Pull Request</dt>
+          <dd>
+            {linkedPullRequest ? (
+              <>
+                <a href={linkedPullRequest.html_url} target="_blank" rel="noreferrer">
+                  #{linkedPullRequest.number}
+                </a>
+                <span className="t-tiny">
+                  {linkedPullRequest.merged ? "Merged" : linkedPullRequest.state}
+                </span>
+              </>
+            ) : (
+              <>
+                <strong>—</strong>
+                <span className="t-tiny">Not linked yet</span>
+              </>
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt className="t-overline">Last Update</dt>
+          <dd>
+            <strong>{relativeTime(issue.updated_at)}</strong>
+            <span className="t-tiny">{formatDateTime(issue.updated_at)}</span>
+          </dd>
+        </div>
+      </dl>
+    </Card>
   );
 }

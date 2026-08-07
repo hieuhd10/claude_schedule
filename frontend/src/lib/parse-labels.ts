@@ -1,6 +1,7 @@
 export interface ParsedLabelMetadata {
   environment: string | null;
   baseBranch: string | null;
+  severity: string | null;
   status: string | null;
   otherLabels: string[];
 }
@@ -8,6 +9,7 @@ export interface ParsedLabelMetadata {
 export function parseLabelMetadata(labels: string[]): ParsedLabelMetadata {
   let environment: string | null = null;
   let baseBranch: string | null = null;
+  let severity: string | null = null;
   let status: string | null = null;
   const otherLabels: string[] = [];
 
@@ -18,6 +20,8 @@ export function parseLabelMetadata(labels: string[]): ParsedLabelMetadata {
       environment = value;
     } else if (prefix === "base" && value) {
       baseBranch = value;
+    } else if (prefix === "severity" && value) {
+      severity = value;
     } else if (prefix === "status" && value) {
       status = value;
     } else {
@@ -25,5 +29,5 @@ export function parseLabelMetadata(labels: string[]): ParsedLabelMetadata {
     }
   }
 
-  return { environment, baseBranch, status, otherLabels };
+  return { environment, baseBranch, severity, status, otherLabels };
 }

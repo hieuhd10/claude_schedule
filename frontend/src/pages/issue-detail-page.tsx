@@ -1,10 +1,15 @@
-import { ActivityTimeline } from "../components/activity-timeline";
-import { CheckpointPanel } from "../components/checkpoint-panel";
-import { CommandComposer } from "../components/command-composer";
+import { useEffect, useState } from "react";
+
+import type { Stage } from "../api/types";
 import { IssueHeader } from "../components/issue-header";
-import { LifecycleStepper } from "../components/lifecycle-stepper";
-import { StageDetailPanel } from "../components/stage-detail-panel";
+import { IssueInformation } from "../components/issue-information";
+import { IssueTabs, type IssueTab } from "../components/issue-tabs";
+import { IssueToolbar } from "../components/issue-toolbar";
+import { OverviewTab } from "../components/overview-tab";
+import { QaReportTab } from "../components/qa-report-tab";
 import { StatusBanner } from "../components/status-banner";
+import { formatDateTime } from "../lib/format-time";
+import type { LifecycleSignals } from "../lib/lifecycle-progress";
 import { useIssueDetail } from "../hooks/use-issue-detail";
 
 interface IssueDetailPageProps {
@@ -16,6 +21,14 @@ interface IssueDetailPageProps {
 export function IssueDetailPage({ owner, repository, issueNumber }: IssueDetailPageProps) {
   const { data, loading, error, refresh, isWaitingForClaude, pollAttempts, startWaitingForClaude } =
     useIssueDetail(owner, repository, issueNumber);
+  const [tab, setTab] = useState<IssueTab>("overview");
+  const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
+
+  // Follow the lifecycle whenever the issue changes; an explicit step pick wins until then.
+  useEffect(() => {
+    setSelectedStage(null);
+    setTab("overview");
+  }, [owner, repository, issueNumber]);
 
   if (loading && !data) {
     return <StatusBanner loading />;
@@ -29,69 +42,59 @@ export function IssueDetailPage({ owner, repository, issueNumber }: IssueDetailP
     return null;
   }
 
+  const signals: LifecycleSignals = {
+    lifecycle: data.lifecycle,
+    issue: data.issue,
+    linkedPullRequest: data.linked_pull_request,
+    prChecks: data.pr_checks,
+    prCommitCount: data.pr_commits.length,
+  };
+
   return (
     <div className="issue-detail-page">
-      <IssueHeader
+      <IssueToolbar
         owner={owner}
         repository={repository}
         issue={data.issue}
-        linkedPullRequest={data.linked_pull_request}
         onRefresh={refresh}
         refreshing={loading}
       />
 
-      <StatusBanner
-        error={error}
-        isWaitingForClaude={isWaitingForClaude}
-        pollAttempts={pollAttempts}
+      <IssueHeader
+        issue={data.issue}
+        lifecycle={data.lifecycle}
+        linkedPullRequest={data.linked_pull_request}
       />
 
-      <section className="completion-flow">
-        <h2 className="completion-flow__title">Completion Flow</h2>
-        <LifecycleStepper currentStage={data.lifecycle.stage} />
+      <StatusBanner error={error} isWaitingForClaude={isWaitingForClaude} pollAttempts={pollAttempts} />
 
-        {!data.linked_pull_request && (
-          <p className="issue-detail-page__no-pr-note">
-            No Pull Request linked yet. Claude needs to complete the Fix step and open a Pull
-            Request before Review and Test actions become available.
-          </p>
-        )}
-      </section>
+      <IssueInformation issue={data.issue} linkedPullRequest={data.linked_pull_request} />
 
-      <div className="issue-detail-page__columns">
-        <div className="issue-detail-page__main">
-          <StageDetailPanel
-            lifecycle={data.lifecycle}
-            linkedPullRequest={data.linked_pull_request}
-            prChecks={data.pr_checks}
-            prCommits={data.pr_commits}
-          />
+      <IssueTabs
+        active={tab}
+        onChange={setTab}
+        updatedLabel={`Updated ${formatDateTime(data.issue.updated_at)}`}
+      />
 
-          <CommandComposer
+      <div id={`issue-panel-${tab}`} role="tabpanel" aria-labelledby={`issue-tab-${tab}`}>
+        {tab === "overview" && (
+          <OverviewTab
             owner={owner}
             repository={repository}
             issueNumber={issueNumber}
-            linkedPullRequest={data.linked_pull_request}
-            currentStage={data.lifecycle.stage}
+            data={data}
+            signals={signals}
+            selectedStage={selectedStage ?? data.lifecycle.stage}
+            onSelectStage={setSelectedStage}
             onPosted={(_comment, startedClaudeCommand) => {
               void refresh();
               if (startedClaudeCommand) startWaitingForClaude();
             }}
+            onCheckpointPosted={() => void refresh()}
           />
+        )}
 
-          <CheckpointPanel
-            owner={owner}
-            repository={repository}
-            issueNumber={issueNumber}
-            currentStage={data.lifecycle.stage}
-            onPosted={() => void refresh()}
-          />
-        </div>
-
-        <div className="issue-detail-page__sidebar">
-          <h2>Activity Timeline</h2>
-          <ActivityTimeline items={data.activity} />
-        </div>
+        {tab === "qa-report" && <QaReportTab data={data} signals={signals} />}
       </div>
     </div>
   );

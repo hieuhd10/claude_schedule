@@ -1,0 +1,13 @@
+/* LIFT Tailux v1.0 — global entry point. Import this one file. */
+@import "./tokens/fonts.css";
+@import "./tokens/palette.css";
+@import "./tokens/typography.css";
+@import "./tokens/spacing.css";
+@import "./tokens/radius.css";
+@import "./tokens/elevation.css";
+@import "./tokens/motion.css";
+@import "./tokens/semantic.css";
+@import "./tokens/themes.css";
+@import "./tokens/base.css";
+@import "./tokens/components.css";
+@import "./tokens/utilities.css";

@@ -1,0 +1,256 @@
+/* Component classes, translated 1:1 from the Tailux Tailwind source
+   (src/styles/app/**). Values are exact — 0.5rem/1.25rem button padding,
+   1.125rem checkboxes, 65px header — nothing snapped to a tidier grid.
+   Colourable components read the --this slot; set it with `this:success` etc. */
+
+/* ---------------------------------------------------------------- Button */
+.btn-base { display: inline-flex; cursor: pointer; align-items: center; justify-content: center; text-align: center; font-weight: var(--font-weight-medium); letter-spacing: var(--tracking-wide); outline: none; border: 1px solid transparent; background: none; transition: all var(--duration-base) var(--ease-in-out) }
+.btn-base:disabled, .btn-base[data-disabled="true"] { pointer-events: none; user-select: none }
+.btn { border-radius: var(--radius-lg); padding: 0.5rem 1.25rem; font-size: var(--text-sm) }
+.btn:disabled { opacity: 0.7 }
+.dark .btn:disabled { opacity: 0.6 }
+.btn.is-icon { flex-shrink: 0; padding: 0 }
+
+.btn-filled { background-color: var(--this); color: var(--on-this) }
+.btn-filled:hover, .btn-filled:focus { background-color: var(--this-darker) }
+.btn-filled:active { background-color: color-mix(in srgb, var(--this-darker) 90%, transparent) }
+.btn-soft { color: var(--this-darker); background-color: color-mix(in srgb, var(--this-darker) 8%, transparent) }
+.btn-soft:hover, .btn-soft:focus { background-color: color-mix(in srgb, var(--this-darker) 15%, transparent) }
+.btn-outlined { color: var(--this-darker); border-color: var(--this-darker) }
+.btn-outlined:hover, .btn-outlined:focus { background-color: color-mix(in srgb, var(--this-darker) 5%, transparent) }
+.btn-flat { color: var(--this-darker) }
+.btn-flat:hover, .btn-flat:focus { background-color: color-mix(in srgb, var(--this-darker) 8%, transparent) }
+.dark .btn-soft { color: var(--this-lighter); background-color: color-mix(in srgb, var(--this-lighter) 10%, transparent) }
+.dark .btn-soft:hover, .dark .btn-soft:focus { background-color: color-mix(in srgb, var(--this-lighter) 20%, transparent) }
+.dark .btn-outlined { color: var(--this-lighter); border-color: var(--this-lighter) }
+.dark .btn-flat { color: var(--this-lighter) }
+.dark .btn-flat:hover, .dark .btn-flat:focus { background-color: color-mix(in srgb, var(--this-lighter) 10%, transparent) }
+
+.btn-neutral.btn-filled { background-color: var(--color-gray-150); color: var(--color-gray-900) }
+.btn-neutral.btn-filled:hover, .btn-neutral.btn-filled:focus { background-color: var(--color-gray-200) }
+.btn-neutral.btn-soft { background-color: rgb(238 235 234 / 0.4); color: var(--color-gray-900) }
+.btn-neutral.btn-soft:hover, .btn-neutral.btn-soft:focus { background-color: rgb(230 226 225 / 0.25) }
+.btn-neutral.btn-outlined { border-color: var(--color-gray-300); color: var(--color-gray-900) }
+.btn-neutral.btn-outlined:hover, .btn-neutral.btn-outlined:focus { background-color: rgb(211 206 204 / 0.28) }
+.btn-neutral.btn-flat { color: var(--color-gray-700) }
+.btn-neutral.btn-flat:hover, .btn-neutral.btn-flat:focus { background-color: rgb(211 206 204 / 0.28) }
+.dark .btn-neutral.btn-filled { background-color: var(--surface-2); color: var(--color-dark-50) }
+.dark .btn-neutral.btn-filled:hover, .dark .btn-neutral.btn-filled:focus { background-color: var(--surface-1) }
+.dark .btn-neutral.btn-soft { background-color: rgb(51 47 46 / 0.35); color: var(--color-dark-50) }
+.dark .btn-neutral.btn-outlined { border-color: var(--color-dark-450); color: var(--color-dark-50) }
+.dark .btn-neutral.btn-outlined:hover { background-color: rgb(143 136 134 / 0.2) }
+.dark .btn-neutral.btn-flat { color: var(--color-dark-200) }
+.dark .btn-neutral.btn-flat:hover, .dark .btn-neutral.btn-flat:focus { background-color: rgb(143 136 134 / 0.12) }
+.btn.is-glow { box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--this) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--this) 50%, transparent) }
+.btn-neutral.is-glow { box-shadow: 0 10px 15px -3px rgb(230 226 225 / 0.6), 0 4px 6px -4px rgb(230 226 225 / 0.6) }
+
+/* ------------------------------------------------------------------ Card */
+.card { border-radius: var(--radius-lg) }
+.card.skin-shadow { background-color: var(--surface-card); box-shadow: var(--shadow-soft) }
+.dark .card.skin-shadow { background-color: var(--color-dark-700); box-shadow: none }
+.card.skin-bordered { border: 1px solid var(--color-gray-200); background-color: var(--surface-card) }
+.dark .card.skin-bordered { border-color: var(--color-dark-600); background-color: var(--color-dark-900) }
+@media print { .card.skin-shadow { box-shadow: none } .card.skin-bordered { border: 0 } }
+
+/* ------------------------------------------------------- Badge and Tag */
+.badge-base, .tag-base { display: inline-flex; align-items: center; justify-content: center; vertical-align: baseline; font-weight: var(--font-weight-medium); line-height: 1; letter-spacing: var(--tracking-wide) }
+.badge, .tag { border-radius: var(--radius-sm); padding: 0.25rem 0.5rem; font-size: var(--text-xs) }
+.tag { text-decoration: none; transition: var(--transition-color) }
+.badge-filled, .tag-filled { color: var(--on-this); background-color: var(--this) }
+.badge-outlined, .tag-outlined { border: 1px solid color-mix(in srgb, var(--this) 30%, transparent); color: var(--this) }
+.badge-soft, .tag-soft { color: var(--this-darker); background-color: color-mix(in srgb, var(--this-darker) 7%, transparent) }
+.tag-filled:hover, .tag-filled:focus { background-color: var(--this-darker) }
+.tag-soft:hover, .tag-soft:focus { color: var(--on-this); background-color: var(--this-darker) }
+.dark .badge-outlined, .dark .tag-outlined { border-color: color-mix(in srgb, var(--this-lighter) 30%, transparent); color: var(--this-lighter) }
+.dark .badge-soft, .dark .tag-soft { color: var(--this-lighter); background-color: color-mix(in srgb, var(--this-lighter) 10%, transparent) }
+.badge-neutral.badge-filled, .tag-neutral.tag-filled { background-color: var(--color-gray-200); color: var(--color-gray-900) }
+.badge-neutral.badge-outlined, .tag-neutral.tag-outlined { border-color: var(--color-gray-300); color: var(--color-gray-900) }
+.badge-neutral.badge-soft, .tag-neutral.tag-soft { background-color: rgb(230 226 225 / 0.4); color: var(--color-gray-900) }
+.dark .badge-neutral.badge-filled, .dark .tag-neutral.tag-filled { background-color: var(--surface-2); color: var(--color-dark-50) }
+.dark .badge-neutral.badge-outlined, .dark .tag-neutral.tag-outlined { border-color: var(--surface-1); color: var(--color-dark-50) }
+.dark .badge-neutral.badge-soft, .dark .tag-neutral.tag-soft { background-color: rgb(51 47 46 / 0.35); color: var(--color-dark-50) }
+
+/* ---------------------------------------------------------------- Avatar */
+.avatar { position: relative; display: inline-flex; flex-shrink: 0 }
+.avatar-display { border-radius: var(--radius-full); font-size: var(--text-base) }
+.avatar-image { width: 100%; height: 100%; object-fit: cover; object-position: center }
+.avatar-initial { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; font-weight: var(--font-weight-medium); text-transform: uppercase; user-select: none }
+.avatar-initial.filled { background-color: var(--this); color: var(--on-this) }
+.avatar-initial.soft { background-color: color-mix(in srgb, var(--this-darker) 10%, transparent); color: var(--this-darker) }
+.avatar-initial.neutral.filled { background-color: var(--color-gray-200); color: var(--color-gray-700) }
+.dark .avatar-initial.neutral.filled { background-color: var(--surface-2); color: var(--color-dark-100) }
+.dark .avatar-initial.soft { background-color: color-mix(in srgb, var(--this-lighter) 10%, transparent); color: var(--this-lighter) }
+.avatar-dot { position: absolute; width: 0.875rem; height: 0.875rem; border: 2px solid #fff; border-radius: var(--radius-full) }
+.dark .avatar-dot { border-color: var(--color-dark-700) }
+
+/* --------------------------------------------------------------- Fields */
+.input-root, .input-wrapper { display: flex; flex-direction: column }
+.input-label { font-size: var(--text-xs-plus); line-height: var(--text-xs-plus--line-height); color: var(--text-body) }
+.input-description { margin-top: 0.25rem; font-size: var(--text-xs); color: var(--color-gray-400) }
+.dark .input-description { color: var(--color-dark-300) }
+.input-error { margin-top: 0.25rem; font-size: var(--text-xs); color: var(--color-error) }
+.dark .input-error { color: var(--color-error-lighter) }
+.form-input-base, .form-textarea-base, .form-select-base { display: block; width: 100%; appearance: none; background-color: transparent; letter-spacing: var(--tracking-wide); outline: none; font-family: inherit; font-size: var(--text-sm); transition: border-color var(--duration-base) var(--ease-in-out), background-color var(--duration-base) var(--ease-in-out) }
+.form-input, .form-textarea, .form-select { border-radius: var(--radius-lg); border: 1px solid var(--color-gray-300); padding: 0.5rem 0.75rem; text-align: start; color: var(--color-gray-800) }
+.form-input::placeholder, .form-textarea::placeholder { font-weight: 300; color: var(--color-gray-600) }
+.form-input:hover, .form-textarea:hover, .form-select:hover { border-color: var(--color-gray-400) }
+.form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--color-primary-600) }
+.form-textarea { resize: none }
+.form-input.has-prefix, .form-select.has-prefix { padding-inline-start: 2.25rem }
+.form-input.has-suffix, .form-select.has-suffix { padding-inline-end: 2.25rem }
+.form-input.is-error, .form-textarea.is-error, .form-select.is-error { border-color: var(--color-error) }
+.form-input:disabled, .form-textarea:disabled, .form-select:disabled { cursor: not-allowed; background-color: var(--color-gray-150); border-color: var(--color-gray-300); opacity: 0.6 }
+.dark .form-input, .dark .form-textarea, .dark .form-select { border-color: var(--color-dark-450); color: var(--color-dark-100) }
+.dark .form-input::placeholder, .dark .form-textarea::placeholder { color: var(--color-dark-200) }
+.dark .form-input:hover, .dark .form-textarea:hover, .dark .form-select:hover { border-color: var(--color-dark-400) }
+.dark .form-input:focus, .dark .form-textarea:focus, .dark .form-select:focus { border-color: var(--color-primary-500) }
+.dark .form-input:disabled, .dark .form-textarea:disabled { background-color: var(--color-dark-600); border-color: var(--color-dark-500) }
+.field-affix { position: absolute; top: 0; display: flex; height: 100%; width: 2.25rem; align-items: center; justify-content: center; color: var(--color-gray-400); transition: color var(--duration-base) var(--ease-in-out); pointer-events: none }
+.field-affix.prefix { inset-inline-start: 0 }
+.field-affix.suffix { inset-inline-end: 0 }
+.dark .field-affix { color: var(--color-dark-300) }
+.input-wrapper:focus-within .field-affix { color: var(--color-primary-600) }
+.dark .input-wrapper:focus-within .field-affix { color: var(--color-primary-500) }
+
+/* -------------------------------------------------- Checkbox / Radio */
+.form-checkbox, .form-radio { position: relative; display: inline-block; width: 1.125rem; height: 1.125rem; flex-shrink: 0; cursor: pointer; user-select: none; appearance: none; overflow: hidden; border: 1px solid rgb(171 164 162 / 0.85); outline: none; transition: all var(--duration-base) var(--ease-out); print-color-adjust: exact }
+.form-checkbox { border-radius: var(--radius-sm) }
+.form-radio { border-radius: var(--radius-full) }
+.form-checkbox::before, .form-radio::before { content: ""; position: absolute; inset: 0; width: 100%; height: 100%; transform: scale(0); transition: transform var(--duration-base) var(--ease-in-out); background-position: center; background-repeat: no-repeat; background-size: 100% 100%; mask-position: center; mask-repeat: no-repeat; mask-size: 100% 100% }
+.form-checkbox::before { transform-origin: bottom; background-image: var(--glyph-dot-sm) }
+.form-checkbox:checked::before { background-image: var(--glyph-check) }
+.form-checkbox:indeterminate::before { background-image: var(--glyph-dash); transition: none }
+.form-radio::before { background-image: var(--glyph-dot) }
+.form-checkbox:checked::before, .form-radio:checked::before, .form-checkbox:indeterminate::before { transform: scale(1) }
+.form-checkbox:hover, .form-radio:hover, .form-checkbox:focus, .form-radio:focus { border-color: var(--this) }
+.form-checkbox:checked, .form-radio:checked, .form-checkbox:indeterminate { border-color: var(--this); background-color: var(--this) }
+.form-checkbox.outlined:checked, .form-radio.outlined:checked, .form-checkbox.outlined:indeterminate { background-color: transparent }
+.form-checkbox.outlined::before, .form-radio.outlined::before { background-image: none; background-color: var(--this) }
+.form-checkbox.outlined::before { mask-image: var(--glyph-dot-sm) }
+.form-checkbox.outlined:checked::before { mask-image: var(--glyph-check) }
+.form-checkbox.outlined:indeterminate::before { mask-image: var(--glyph-dash) }
+.form-radio.outlined::before { mask-image: var(--glyph-dot) }
+.form-checkbox:disabled, .form-radio:disabled { pointer-events: none; opacity: 0.7; border-color: var(--color-gray-150); background-color: var(--color-gray-150) }
+.form-checkbox:disabled::before, .form-radio:disabled::before { background-image: none; background-color: var(--color-gray-400) }
+.form-checkbox:disabled::before { mask-image: var(--glyph-dot-sm) }
+.form-checkbox:disabled:checked::before { mask-image: var(--glyph-check) }
+.form-checkbox:disabled:indeterminate::before { mask-image: var(--glyph-dash) }
+.form-radio:disabled::before { mask-image: var(--glyph-dot) }
+.dark .form-checkbox, .dark .form-radio { border-color: var(--color-dark-400) }
+.dark .form-checkbox:checked, .dark .form-radio:checked, .dark .form-checkbox:indeterminate { border-color: var(--this-light); background-color: var(--this-light) }
+.dark .form-checkbox:disabled::before, .dark .form-radio:disabled::before { background-color: var(--color-dark-800) }
+
+/* --------------------------------------------------------------- Switch */
+.form-switch { position: relative; display: inline-block; height: 1.25rem; width: 2.5rem; flex-shrink: 0; cursor: pointer; user-select: none; appearance: none; overflow: hidden; border-radius: var(--radius-full); outline: none; --thumb-border: 2px; background-color: var(--color-gray-300); transition: all var(--duration-base) var(--ease-in-out) }
+.form-switch::before { content: ""; position: absolute; left: var(--thumb-border); top: var(--thumb-border); height: calc(100% - var(--thumb-border) * 2); width: calc((100% / 2) - (var(--thumb-border) * 2)); border-radius: var(--radius-full); background-color: var(--color-gray-50); transition: all var(--duration-base) var(--ease-in-out) }
+.form-switch:checked { background-color: var(--this) }
+.form-switch:checked::before { transform: translateX(calc(100% + (var(--thumb-border) * 2))); background-color: #fff }
+.form-switch:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--this) 50%, transparent) }
+.form-switch.is-outline { background-color: transparent; border: 1px solid rgb(171 164 162 / 0.85) }
+.form-switch.is-outline::before { background-color: var(--color-gray-300); width: calc((100% / 2) - (var(--thumb-border) * 2) - 1px) }
+.form-switch.is-outline:checked { border-color: var(--this) }
+.form-switch.is-outline:checked::before { background-color: var(--this); transform: translateX(calc(100% + (var(--thumb-border) * 2) + 2px)) }
+.form-switch:disabled { pointer-events: none; opacity: 0.7; background-color: var(--color-gray-150); border: 1px solid var(--color-gray-200) }
+.form-switch:disabled::before { background-color: var(--color-gray-400) }
+.dark .form-switch { background-color: var(--surface-1) }
+.dark .form-switch::before { background-color: var(--color-dark-50) }
+.dark .form-switch:checked { background-color: var(--this-light) }
+
+/* ---------------------------------------------------------------- Range */
+.form-range { display: block; width: 100%; appearance: none; background-color: transparent; outline: none; --thumb-size: 1.125rem; --track-h: 0.375rem; color: var(--color-gray-500) }
+.dark .form-range { color: var(--color-dark-300) }
+.form-range::-webkit-slider-runnable-track { height: var(--track-h); width: 100%; border-radius: var(--radius-full); background-color: var(--color-gray-150) }
+.dark .form-range::-webkit-slider-runnable-track { background-color: var(--color-dark-500) }
+.form-range::-webkit-slider-thumb { position: relative; top: 50%; height: var(--thumb-size); width: var(--thumb-size); transform: translateY(-50%); cursor: pointer; appearance: none; border-radius: var(--radius-full); border: none; background-color: currentColor; transition: all var(--duration-base) var(--ease-in-out) }
+.form-range::-webkit-slider-thumb:active { transform: translateY(-50%) scale(1.25) }
+.form-range::-moz-range-track { height: var(--track-h); width: 100%; border-radius: var(--radius-full); background-color: var(--color-gray-150) }
+.form-range::-moz-range-thumb { height: var(--thumb-size); width: var(--thumb-size); cursor: pointer; appearance: none; border-radius: var(--radius-full); border: none; background-color: currentColor }
+
+/* ---------------------------------------------------------------- Table */
+.table { width: 100%; border-collapse: collapse; text-align: start }
+.table-td, .table-th { white-space: nowrap; padding: 0.75rem 1rem }
+@media (min-width: 640px) { .table-td, .table-th { padding-left: 1.25rem; padding-right: 1.25rem } }
+.table-th { text-transform: uppercase; font-size: var(--text-tiny-plus); letter-spacing: var(--tracking-wide); font-weight: var(--font-weight-semibold); color: var(--text-muted); text-align: start }
+.table.is-hoverable > .table-tbody > .table-tr:hover:not(.row-selected) > .table-td { background-color: var(--color-gray-100) }
+.table.is-zebra > .table-tbody > .table-tr:nth-child(even) > .table-td { background-color: var(--color-gray-100) }
+.dark .table.is-hoverable > .table-tbody > .table-tr:hover:not(.row-selected) > .table-td, .dark .table.is-zebra > .table-tbody > .table-tr:nth-child(even) > .table-td { background-color: rgb(51 47 46 / 0.5) }
+.table.is-dense > .table-tbody > .table-tr > .table-td { padding: 0.375rem 0.5rem }
+.table.is-dense > .table-thead > .table-tr > .table-th { padding-left: 0.5rem; padding-right: 0.5rem }
+.table.is-sticky .table-thead { position: sticky; top: 0; z-index: 3 }
+
+/* ------------------------------------------------------------- Progress */
+.progress-rail { position: relative; display: flex; height: 0.5rem; width: 100%; overflow: hidden; border-radius: var(--radius-full); background-color: var(--color-gray-150) }
+.dark .progress-rail { background-color: var(--color-dark-500) }
+.progress { position: relative; border-radius: var(--radius-full); background-color: var(--this); transition: width var(--duration-base) var(--ease-out); display: flex; align-items: center; justify-content: flex-end; line-height: 1 }
+.dark .progress { background-color: var(--this-light) }
+.progress.is-neutral { background-color: var(--color-gray-500) }
+.dark .progress.is-neutral { background-color: var(--color-dark-400) }
+.progress.is-indeterminate { position: absolute; inset: 0; transform-origin: 100% 50%; animation: progress-increase 1.5s var(--ease-elastic) infinite }
+.progress.is-active::before { content: ""; position: absolute; inset: 0; border-radius: var(--radius-sm); background-color: #fff; animation: progress-active 2s cubic-bezier(0.55, 0.2, 0.3, 0.67) infinite }
+@keyframes progress-increase { from { transform: translateX(-100%) scaleX(.1) } to { transform: translateX(100%) scaleX(1) } }
+@keyframes progress-active { 0% { opacity: 0.5; transform: translateX(-100%) } 100% { opacity: 0; transform: translateX(0) } }
+
+/* -------------------------------------------------------------- Spinner */
+.spinner-base { display: inline-flex; width: 1.75rem; height: 1.75rem }
+.spinner { border-width: 3px; border-style: solid; border-radius: var(--radius-full); border-color: var(--this); border-right-color: transparent }
+.spinner.is-neutral { border-color: var(--color-gray-500); border-right-color: transparent }
+.spinner.soft { border-color: color-mix(in srgb, var(--this) 30%, transparent); border-right-color: var(--this) }
+.spinner.is-neutral.soft { border-color: var(--color-gray-150); border-right-color: var(--color-gray-500) }
+.spinner.is-elastic { animation-timing-function: var(--ease-elastic) }
+.animate-spin { animation: spin 1s linear infinite }
+@keyframes spin { to { transform: rotate(360deg) } }
+
+/* ------------------------------------------------------------- Skeleton */
+.skeleton { position: relative; overflow: hidden; background-color: var(--color-gray-150) }
+.dark .skeleton { background-color: var(--color-dark-600) }
+.skeleton.animate-wave::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(90deg, transparent, var(--sk-color), transparent); animation: skeleton-wave 1.5s var(--ease-elastic) infinite }
+@keyframes skeleton-wave { 0% { transform: translateX(-100%) } 50%, 100% { transform: translateX(100%) } }
+
+/* ------------------------------------------------------------- Timeline */
+.timeline { --timeline-line-width: 1px; --timeline-point-size: 0.75rem }
+.timeline.line-space { --timeline-line-space: 0.75rem }
+.timeline-item { position: relative; display: flex; flex: 1; padding-bottom: 2rem }
+.timeline-item::before { content: ""; position: absolute; left: 0; right: 0; top: var(--timeline-point-size); bottom: 0; order: -1; width: var(--timeline-line-width); transform: translateX(calc((var(--timeline-point-size) / 2) - (var(--timeline-line-width) / 2))); background-color: var(--color-gray-300) }
+.dark .timeline-item::before { background-color: var(--color-dark-400) }
+.timeline-item:last-child { padding-bottom: 0 }
+.timeline-item:last-child::before { background: linear-gradient(to bottom, var(--color-gray-300), transparent) }
+.timeline.line-space .timeline-item::before { top: calc(var(--timeline-point-size) + var(--timeline-line-space)); bottom: var(--timeline-line-space) }
+.timeline-item-point { position: relative; display: flex; flex-shrink: 0; align-items: center; justify-content: center; margin: 0; width: var(--timeline-point-size); height: var(--timeline-point-size); border-radius: var(--radius-full); background-color: var(--color-gray-300) }
+.dark .timeline-item-point { background-color: var(--color-dark-400) }
+.timeline-item-point.filled { background-color: var(--this) }
+.timeline-item-point.outlined { background-color: transparent; border: 2px solid var(--this) }
+.timeline-item-content-wrappper { flex: 1; padding-inline-start: 1rem }
+@media (min-width: 640px) { .timeline-item-content-wrappper { padding-inline-start: 2rem } }
+
+/* ----------------------------------------------------------- Pagination */
+.pagination { display: inline-flex; border-radius: var(--radius-lg); background-color: var(--color-gray-150); font-weight: var(--font-weight-medium); color: var(--color-gray-700) }
+.dark .pagination { background-color: var(--surface-2); color: var(--color-dark-100) }
+.pagination-control { display: flex; height: 2rem; min-width: 2rem; flex-shrink: 0; align-items: center; justify-content: center; border-radius: var(--radius-lg); padding: 0 0.625rem; line-height: 1.25; outline: none; border: none; background: none; cursor: pointer; font: inherit; color: inherit; transition: var(--transition-color) }
+.pagination-control:hover:not(:disabled) { background-color: rgb(211 206 204 / 0.45) }
+.pagination-control.is-active { background-color: var(--this); color: var(--on-this) }
+.pagination-control:disabled { opacity: 0.5; cursor: default }
+.pagination-control-icon { aspect-ratio: 1; padding: 0 }
+.pagination-icon { width: 1.125rem; height: 1.125rem }
+
+/* ---------------------------------------------------------------- Steps */
+.steps { display: flex; align-items: flex-start; --line: 0.25rem; --size: 2rem }
+.steps.line-space { --space: 0.5rem }
+.steps .step { display: flex; flex: 1; flex-direction: column; text-align: center; letter-spacing: var(--tracking-wide); overflow-wrap: break-word }
+.steps .step .step-header { position: relative; margin: 0 auto 0.5rem; display: flex; height: var(--size); width: var(--size); flex-shrink: 0; align-items: center; justify-content: center }
+.steps .step:not(:last-child)::before { content: ""; position: relative; top: calc(var(--size) / 2 + var(--line) / 2); order: -1; height: var(--line); border-radius: var(--radius-full); left: calc(50% + calc(var(--size) / 2 + var(--space, 0px))); width: calc(100% - var(--size) - calc(var(--space, 0px) * 2)); background-color: var(--color-gray-200) }
+.dark .steps .step:not(:last-child)::before { background-color: var(--color-dark-500) }
+
+/* --------------------------------------------------------- Scroll shadow */
+[data-top-scroll="true"] { mask-image: linear-gradient(0deg, #000 calc(100% - var(--scroll-shadow-size, 2.5rem)), transparent) }
+[data-bottom-scroll="true"] { mask-image: linear-gradient(180deg, #000 calc(100% - var(--scroll-shadow-size, 2.5rem)), transparent) }
+[data-top-bottom-scroll="true"] { mask-image: linear-gradient(#000, #000, transparent 0, #000 var(--scroll-shadow-size, 2.5rem), #000 calc(100% - var(--scroll-shadow-size, 2.5rem)), transparent) }
+[data-left-scroll="true"] { mask-image: linear-gradient(270deg, #000 calc(100% - var(--scroll-shadow-size, 2.5rem)), transparent) }
+[data-right-scroll="true"] { mask-image: linear-gradient(90deg, #000 calc(100% - var(--scroll-shadow-size, 2.5rem)), transparent) }
+[data-left-right-scroll="true"] { mask-image: linear-gradient(to right, #000, #000, transparent 0, #000 var(--scroll-shadow-size, 2.5rem), #000 calc(100% - var(--scroll-shadow-size, 2.5rem)), transparent) }
+
+/* ------------------------------------------------------ Accordion shell */
+.accordion-item { border-bottom: 1px solid var(--border-subtle) }
+.accordion-button { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.75rem 0; background: none; border: none; cursor: pointer; text-align: start; font: inherit; font-weight: var(--font-weight-medium); color: var(--text-heading); outline: none; transition: color var(--duration-base) var(--ease-in-out) }
+.accordion-button:hover { color: var(--accent-text) }
+.accordion-panel { overflow: hidden; transition: height var(--duration-content) var(--ease-in-out) }
+.accordion-panel-inner { padding-bottom: 0.75rem; color: var(--text-muted) }

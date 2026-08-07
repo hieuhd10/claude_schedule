@@ -1,11 +1,17 @@
 import {
   ApiError,
   type Checkpoint,
+  type CloseIssueResponse,
+  type CreatePullRequestRequest,
+  type CreatePullRequestResponse,
+  type FixBranchesResponse,
   type Comment,
   type ConfigResponse,
   type CreateIssueRequest,
   type CreateIssueResponse,
   type IssueDetailResponse,
+  type MergeMethod,
+  type MergePullRequestResponse,
 } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
@@ -113,4 +119,49 @@ export function postCheckpoint(
     method: "POST",
     body: JSON.stringify({ checkpoint }),
   });
+}
+
+export function getFixBranches(
+  owner: string,
+  repository: string,
+  issueNumber: number,
+): Promise<FixBranchesResponse> {
+  return request<FixBranchesResponse>(
+    `/api/issues/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}/${issueNumber}/fix-branches`,
+  );
+}
+
+export function mergePullRequest(
+  owner: string,
+  repository: string,
+  prNumber: number,
+  mergeMethod: MergeMethod,
+): Promise<MergePullRequestResponse> {
+  return request<MergePullRequestResponse>(
+    `/api/pull-requests/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}/${prNumber}/merge`,
+    { method: "POST", body: JSON.stringify({ merge_method: mergeMethod }) },
+  );
+}
+
+export function closeIssue(
+  owner: string,
+  repository: string,
+  issueNumber: number,
+): Promise<CloseIssueResponse> {
+  return request<CloseIssueResponse>(
+    `/api/issues/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}/${issueNumber}/close`,
+    { method: "POST" },
+  );
+}
+
+export function createPullRequest(
+  owner: string,
+  repository: string,
+  issueNumber: number,
+  payload: CreatePullRequestRequest,
+): Promise<CreatePullRequestResponse> {
+  return request<CreatePullRequestResponse>(
+    `/api/issues/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}/${issueNumber}/pull-request`,
+    { method: "POST", body: JSON.stringify(payload) },
+  );
 }

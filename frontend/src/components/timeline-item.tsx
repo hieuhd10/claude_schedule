@@ -1,45 +1,42 @@
 import type { ActivityItem } from "../api/types";
+import { Badge, TimelineItem as DsTimelineItem } from "../design-system/lift-tailux";
+import { ACTIVITY_COLORS } from "../lib/ds-colors";
+import { formatDateTime } from "../lib/format-time";
 
 const CATEGORY_LABELS: Record<ActivityItem["category"], string> = {
   human_command: "Human comment",
   claude_response: "Claude response",
-  github_system: "GitHub/System",
-  ci_workflow: "CI/Workflow",
-};
-
-const CATEGORY_ICON: Record<ActivityItem["category"], string> = {
-  human_command: "▸",
-  claude_response: "✦",
-  github_system: "◇",
-  ci_workflow: "▲",
+  github_system: "GitHub / System",
+  ci_workflow: "CI / Workflow",
 };
 
 interface TimelineItemProps {
   item: ActivityItem;
+  /** The newest entry pings to mark live activity, as the design system does. */
+  isLatest?: boolean;
 }
 
-export function TimelineItem({ item }: TimelineItemProps) {
+export function TimelineItem({ item, isLatest = false }: TimelineItemProps) {
+  const color = ACTIVITY_COLORS[item.category];
+
   return (
-    <li className={`timeline-item timeline-item--${item.category}`}>
-      <div className="timeline-item__meta">
-        <span className="timeline-item__category">
-          <span className="timeline-item__icon" aria-hidden="true">
-            {CATEGORY_ICON[item.category]}
-          </span>
+    <DsTimelineItem color={color} isPing={isLatest} className="activity-item">
+      <div className="activity-item__head">
+        <span className="t-body activity-item__summary">{item.summary}</span>
+        <Badge component="span" variant="soft" color={color}>
           {CATEGORY_LABELS[item.category]}
-        </span>
-        <span className="timeline-item__source">{item.source}</span>
-        {item.actor && <span className="timeline-item__actor">@{item.actor}</span>}
-        {item.created_at && (
-          <span className="timeline-item__time">{new Date(item.created_at).toLocaleString()}</span>
-        )}
+        </Badge>
       </div>
-      <div className="timeline-item__summary">{item.summary}</div>
+      <p className="t-tiny">
+        {item.actor ? `@${item.actor}` : item.source}
+        {item.created_at && ` · ${formatDateTime(item.created_at)}`}
+        {item.actor && ` · ${item.source}`}
+      </p>
       {item.html_url && (
-        <a href={item.html_url} target="_blank" rel="noreferrer">
+        <a className="t-tiny" href={item.html_url} target="_blank" rel="noreferrer">
           View on GitHub ↗
         </a>
       )}
-    </li>
+    </DsTimelineItem>
   );
 }

@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getIssueDetail } from "../api/client";
 import type { IssueDetailResponse } from "../api/types";
+import { lifecycleResult } from "../test-support/lifecycle-fixtures";
 import { useIssueDetail } from "./use-issue-detail";
 
 vi.mock("../api/client", () => ({ getIssueDetail: vi.fn() }));
@@ -39,15 +40,7 @@ function issueDetail(number: number): IssueDetailResponse {
     pr_commits: [],
     pr_checks: [],
     activity: [],
-    lifecycle: {
-      stage: "debug",
-      reasoning: [],
-      last_command: null,
-      last_claude_response: null,
-      next_recommended_action: "Investigate",
-      review_findings: [],
-      test_result: null,
-    },
+    lifecycle: lifecycleResult({ next_recommended_action: "Post a @claude debug command." }),
   };
 }
 

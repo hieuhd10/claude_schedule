@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import "./App.css";
 import { parseIssueUrl } from "./api/client";
+import { Card } from "./design-system/lift-tailux";
 import { IssueCreateForm } from "./components/issue-create-form";
 import { IssueUrlForm } from "./components/issue-url-form";
 import { StatusBanner } from "./components/status-banner";
@@ -44,8 +45,8 @@ function App() {
       <header className="app__header">
         <div className="app__brand-mark" aria-hidden="true">CS</div>
         <div>
-          <h1 className="app__title">Issue completion workspace</h1>
-          <p>Track every step from bug report to verified resolution, with human or Claude-assisted comments.</p>
+          <h1 className="app__title t-page-title">Issue completion workspace</h1>
+          <p className="t-body">Track every step from bug report to verified resolution, with human or Claude-assisted comments.</p>
         </div>
       </header>
 
@@ -68,12 +69,12 @@ function App() {
 
       {mode === "load" && (
         <>
-          <section className="app__intake-card">
-            <span className="eyebrow">Continue tracking</span>
-            <h2>Load an existing GitHub Issue</h2>
-            <p>Paste the issue URL to rebuild its lifecycle from GitHub activity.</p>
+          <Card className="app__intake-card">
+            <span className="t-overline app__eyebrow">Continue Tracking</span>
+            <h2 className="t-page-title">Load an existing GitHub Issue</h2>
+            <p className="t-body">Paste the issue URL to rebuild its lifecycle from GitHub activity.</p>
             <IssueUrlForm onSubmit={handleSubmit} submitting={parsing} />
-          </section>
+          </Card>
           {parseError && <StatusBanner error={parseError} />}
           {!target && !parseError && (
             <div className="app__empty-state">

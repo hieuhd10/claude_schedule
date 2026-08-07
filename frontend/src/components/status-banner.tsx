@@ -35,6 +35,8 @@ function describeError(error: Error): { title: string; detail: string } {
         };
       case "COMMENT_REJECTED":
         return { title: "Comment rejected by GitHub", detail: error.message };
+      case "MERGE_NOT_ALLOWED":
+        return { title: "GitHub refused the merge", detail: error.message };
       case "GITHUB_TIMEOUT":
         return { title: "GitHub API timed out", detail: error.message };
       case "INVALID_URL":

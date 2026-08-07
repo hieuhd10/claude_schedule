@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { Button } from "../design-system/lift-tailux";
+
 interface IssueUrlFormProps {
   onSubmit: (url: string) => void;
   submitting: boolean;
@@ -17,15 +19,16 @@ export function IssueUrlForm({ onSubmit, submitting }: IssueUrlFormProps) {
       }}
     >
       <input
+        className="form-input-base form-input"
         type="url"
         placeholder="https://github.com/owner/repo/issues/123"
         value={url}
         onChange={(event) => setUrl(event.target.value)}
         required
       />
-      <button type="submit" disabled={submitting}>
+      <Button type="submit" color="primary" disabled={submitting}>
         {submitting ? "Loading…" : "Load Issue"}
-      </button>
+      </Button>
     </form>
   );
 }
