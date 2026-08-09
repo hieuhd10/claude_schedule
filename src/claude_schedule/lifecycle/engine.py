@@ -19,16 +19,24 @@ _DEBUG_APPROVED_RE = re.compile(r"\[LIFECYCLE:DEBUG_APPROVED\]", re.IGNORECASE)
 _HUMAN_COMMAND_RE = re.compile(r"^\s*@claude\b", re.IGNORECASE)
 _REVIEW_COMMAND_RE = re.compile(r"\breview\b", re.IGNORECASE)
 _TEST_COMMAND_RE = re.compile(r"\b(?:test|tests|testing|ci)\b", re.IGNORECASE)
+_REVIEW_MARKER_REQUEST_RE = re.compile(r"\bREVIEW (?:PASSED|FAILED)\b", re.IGNORECASE)
+_TEST_MARKER_REQUEST_RE = re.compile(r"\bTEST (?:PASSED|FAILED)\b", re.IGNORECASE)
 
 
 def _command_stage(body: str) -> Stage | None:
     """
     The stage a human command asks to redo, or None if it asks for neither.
 
-    Review is decided first: the Review prompt this app sends asks about "test
-    coverage" without asking for the Test stage to be redone, while a test
-    request has no reason to mention review.
+    Neither stage owns its keyword: the Review prompt this app sends asks about
+    "test coverage", and a test request can name the review it follows. So the
+    marker the command asks for decides first, because that names the stage
+    outright. The bare keywords only speak for commands that ask for no marker.
     """
+    asks_review = bool(_REVIEW_MARKER_REQUEST_RE.search(body))
+    asks_test = bool(_TEST_MARKER_REQUEST_RE.search(body))
+    if asks_review != asks_test:
+        return Stage.REVIEW if asks_review else Stage.TEST
+
     if _REVIEW_COMMAND_RE.search(body):
         return Stage.REVIEW
     if _TEST_COMMAND_RE.search(body):
