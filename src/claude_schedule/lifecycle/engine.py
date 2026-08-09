@@ -21,16 +21,33 @@ _REVIEW_COMMAND_RE = re.compile(r"\breview\b", re.IGNORECASE)
 _TEST_COMMAND_RE = re.compile(r"\b(?:test|tests|testing|ci)\b", re.IGNORECASE)
 
 
+def _command_stage(body: str) -> Stage | None:
+    """
+    The stage a human command asks to redo, or None if it asks for neither.
+
+    Review is decided first: the Review prompt this app sends asks about "test
+    coverage" without asking for the Test stage to be redone, while a test
+    request has no reason to mention review.
+    """
+    if _REVIEW_COMMAND_RE.search(body):
+        return Stage.REVIEW
+    if _TEST_COMMAND_RE.search(body):
+        return Stage.TEST
+    return None
+
+
 def _latest_match(
     comments: list[Comment],
     patterns: dict[str, re.Pattern],
-    command_pattern: re.Pattern,
+    stage: Stage,
 ) -> tuple[str, Comment] | None:
     """Latest result marker plus the comment that carries it, so its author is known."""
     for comment in sorted(comments, key=lambda item: item.created_at, reverse=True):
         if _HUMAN_COMMAND_RE.match(comment.body):
-            # A newer command starts a fresh attempt and invalidates the previous result.
-            if command_pattern.search(comment.body):
+            # A newer command for this stage starts a fresh attempt and invalidates
+            # the previous result. A command aimed at another stage leaves this
+            # stage's result alone.
+            if _command_stage(comment.body) is stage:
                 return None
             continue
         for label, pattern in patterns.items():
@@ -206,12 +223,12 @@ def infer_stage(
     review_match = _latest_match(
         pr_comments,
         {"PASSED": _REVIEW_PASSED_RE, "FAILED": _REVIEW_FAILED_RE},
-        _REVIEW_COMMAND_RE,
+        Stage.REVIEW,
     )
     test_match = _latest_match(
         pr_comments,
         {"PASSED": _TEST_PASSED_RE, "FAILED": _TEST_FAILED_RE},
-        _TEST_COMMAND_RE,
+        Stage.TEST,
     )
     review_marker = review_match[0] if review_match else None
     test_marker = test_match[0] if test_match else None
