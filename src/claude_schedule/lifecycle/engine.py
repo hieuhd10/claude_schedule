@@ -13,16 +13,37 @@ _HUMAN_COMMAND_RE = re.compile(r"^\s*@claude\b", re.IGNORECASE)
 _REVIEW_COMMAND_RE = re.compile(r"\breview\b", re.IGNORECASE)
 _TEST_COMMAND_RE = re.compile(r"\b(?:test|tests|testing|ci)\b", re.IGNORECASE)
 
+_STAGE_REVIEW = "review"
+_STAGE_TEST = "test"
+
+
+def _classify_command_stage(body: str) -> str | None:
+    """Identify the single stage a human @claude command is asking to redo.
+
+    Review is checked first: the built-in Review prompt legitimately talks about
+    "test coverage" as something to review without asking to redo the Test stage,
+    whereas a genuine Test command has no reason to mention review. Checking
+    review first keeps such a comment from being classified as both, which would
+    let it invalidate a recorded Test verdict it was never meant to touch.
+    """
+    if _REVIEW_COMMAND_RE.search(body):
+        return _STAGE_REVIEW
+    if _TEST_COMMAND_RE.search(body):
+        return _STAGE_TEST
+    return None
+
 
 def _latest_match(
     comments: list[Comment],
     patterns: dict[str, re.Pattern],
-    command_pattern: re.Pattern,
+    stage: str,
 ) -> str | None:
     for comment in sorted(comments, key=lambda item: item.created_at, reverse=True):
         if _HUMAN_COMMAND_RE.match(comment.body):
-            # A newer command starts a fresh attempt and invalidates the previous result.
-            if command_pattern.search(comment.body):
+            # A newer command for this stage starts a fresh attempt and invalidates
+            # the previous result. Commands classified under a different stage are
+            # skipped so a Review command can't wipe out a recorded Test verdict.
+            if _classify_command_stage(comment.body) == stage:
                 return None
             continue
         for label, pattern in patterns.items():
@@ -67,20 +88,22 @@ def infer_stage(
     review_marker = _latest_match(
         pr_comments,
         {"PASSED": _REVIEW_PASSED_RE, "FAILED": _REVIEW_FAILED_RE},
-        _REVIEW_COMMAND_RE,
+        _STAGE_REVIEW,
     )
     test_marker = _latest_match(
         pr_comments,
         {"PASSED": _TEST_PASSED_RE, "FAILED": _TEST_FAILED_RE},
-        _TEST_COMMAND_RE,
+        _STAGE_TEST,
     )
 
     reasoning: list[str] = []
     review_findings: list[str] = []
-    test_result: str | None = None
+    # Default to the recorded Test marker so a regression back to an earlier
+    # stage (e.g. a re-review request) keeps surfacing already-recorded Test
+    # evidence instead of silently dropping it.
+    test_result: str | None = test_marker
 
     if issue.state == IssueState.CLOSED:
-        test_result = test_marker
         if linked_pull_request and linked_pull_request.merged:
             reasoning.append("Issue is closed and the linked Pull Request is merged.")
         elif linked_pull_request:
