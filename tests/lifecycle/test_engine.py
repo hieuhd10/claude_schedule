@@ -131,6 +131,28 @@ def test_fix_stage_after_debug_approved_no_pr():
     assert result.stage == Stage.FIX
 
 
+def test_debug_approved_marker_mentioned_mid_sentence_does_not_advance_stage():
+    result = infer_stage(
+        issue=_issue(),
+        issue_comments=[
+            _comment(1, "@claude debug this", "hieuhd10", 1),
+            _comment(2, "Root Cause:\nx", CLAUDE_LOGIN, 2),
+            _comment(
+                3,
+                "Note: don't write [LIFECYCLE:DEBUG_APPROVED] in the description comment.",
+                "hieuhd10",
+                3,
+            ),
+        ],
+        linked_pull_request=None,
+        pr_comments=[],
+        checks=[],
+        claude_bot_login=CLAUDE_LOGIN,
+    )
+    assert result.stage == Stage.DEBUG
+    assert "approve" in result.next_recommended_action.lower()
+
+
 def test_review_stage_pr_exists_no_result_yet():
     result = infer_stage(
         issue=_issue(),
