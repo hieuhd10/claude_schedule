@@ -657,7 +657,7 @@ Nguồn: `src/claude_schedule/settings.py:20-37`, `src/claude_schedule/api/deps.
 
 Các điểm dưới đây là **hành vi code hiện tại**, không nên mặc định xem là business rule mong muốn:
 
-1. Marker và `DEBUG_APPROVED` không xác thực author; bất kỳ comment author nào cũng có thể kích hoạt (bao gồm người ngoài operator/Claude nếu repo public).
+1. Marker và `DEBUG_APPROVED` không xác thực author; bất kỳ comment author nào cũng có thể kích hoạt (bao gồm người ngoài operator/Claude nếu repo public). Cả 5 marker cũng chỉ yêu cầu đứng riêng một dòng, nên marker nằm riêng dòng trong một đoạn trích dẫn hay khối code vẫn được tính là hành động thật.
 2. Khi Review failed, findings chỉ lấy từ latest structured Claude response, không parse manual findings tương ứng.
 3. Tìm linked PR chấp nhận timeline candidate thiếu repository metadata.
 4. Nếu nhiều linked PR, chỉ candidate mới nhất được dùng; PR cũ không còn tham gia inference. Link nhầm một PR khác sẽ đổi PR mà lifecycle bám vào.
@@ -675,6 +675,7 @@ Các điểm dưới đây là **hành vi code hiện tại**, không nên mặc
 - Trước đây closing note của Claude bị xếp nhầm vào Ready to Merge vì trùng heading; panel Completed không bao giờ hiện Summary. Nay thời điểm viết so với `closed_at` quyết định.
 - Trước đây verdict submit qua GitHub review UI không được đọc vì chỉ conversation comments được fetch. Nay reviews đã submit cũng được đọc.
 - Trước đây merge và close phải làm trên GitHub. Nay app có endpoint cho cả hai, và PR đã merged không còn làm stage tụt về Fix.
+- Trước đây `_DEBUG_APPROVED_RE` không neo dòng, nên một comment chỉ *nhắc tới* marker giữa câu cũng mở cổng duyệt Debug và đẩy Issue sang Fix. Nay marker phải đứng riêng một dòng, cùng khuôn với 4 marker REVIEW/TEST (Issue #28).
 - Trước đây một command vô hiệu result của mọi stage có keyword xuất hiện trong body. Prompt Review app gửi chứa "test coverage", nên re-review xoá luôn `TEST PASSED` đã ghi. Nay mỗi command chỉ thuộc một stage và chỉ vô hiệu result của stage đó (Issue #26).
 
 ## 16. Nhánh còn thiếu regression test riêng
