@@ -212,8 +212,11 @@ Nguồn: `src/claude_schedule/github/client.py:42-73`, `src/claude_schedule/gith
 ### 5.1. Human/Claude command
 
 - Command phải bắt đầu bằng `@claude`, không phân biệt hoa thường.
-- Review command: command chứa từ `review`.
-- Test command: command chứa `test`, `tests`, `testing` hoặc `ci`.
+- Mỗi command được xếp vào **đúng một** stage, theo thứ tự:
+  1. Command yêu cầu marker `REVIEW PASSED`/`REVIEW FAILED` → Review; yêu cầu `TEST PASSED`/`TEST FAILED` → Test. Command tự khai stage của nó qua marker mà nó đòi.
+  2. Không đòi marker nào, hoặc đòi cả hai → xét keyword trần: chứa `review` → Review; chứa `test`, `tests`, `testing` hoặc `ci` → Test.
+  3. Không khớp gì → không thuộc stage nào, không vô hiệu result nào.
+- Phân loại một-stage là bắt buộc vì keyword không thuộc riêng stage nào: prompt Review app gửi có cụm "test coverage", còn một yêu cầu test có thể nhắc tới review vừa xong. Xem `_command_stage()`.
 - `last_command` là command mới nhất trên tập hợp Issue comments + PR comments đã sort theo thời gian.
 
 ### 5.2. Result marker
@@ -232,12 +235,12 @@ Hệ quả:
 - Prompt nhắc “report REVIEW PASSED or REVIEW FAILED” không phải result.
 - Marker có thể do operator hoặc Claude viết; engine không kiểm tra author của marker.
 - Engine quét comments từ mới đến cũ.
-- Gặp command mới đúng loại trước result cũ → trả `None`; attempt mới vô hiệu result cũ.
-- Gặp `@claude` command khác loại → bỏ qua và tiếp tục tìm.
+- Gặp command mới được xếp đúng stage đang xét trước result cũ → trả `None`; attempt mới vô hiệu result cũ.
+- Gặp `@claude` command thuộc stage khác → bỏ qua và tiếp tục tìm. Một lần re-review không còn xoá `TEST PASSED` đã ghi, và ngược lại.
 - Gặp marker hợp lệ mới nhất → marker đó thắng.
 - Nếu cùng một comment chứa cả PASSED và FAILED trên các dòng riêng, pattern PASSED được kiểm tra trước và thắng.
 
-Nguồn: `src/claude_schedule/lifecycle/engine.py:7-31`.
+Nguồn: `src/claude_schedule/lifecycle/engine.py:14-64`.
 
 ### 5.3. Claude response
 
@@ -629,13 +632,13 @@ Nguồn: `src/claude_schedule/settings.py:20-37`, `src/claude_schedule/api/deps.
 ### Review
 
 - `REVIEW FAILED` → ở Review, sửa findings rồi có thể post command review mới.
-- Command review mới → vô hiệu Review result cũ.
+- Command review mới → vô hiệu Review result cũ, không đụng tới Test result đã ghi.
 - Marker nằm giữa câu → không hợp lệ, vẫn ở Review.
 
 ### Test
 
 - `TEST FAILED` + Review passed → ở Test với action sửa test failure.
-- Command test mới → vô hiệu Test result cũ.
+- Command test mới → vô hiệu Test result cũ, không đụng tới Review result đã ghi.
 - `TEST PASSED` nhưng không có checks → ở Test.
 - `TEST PASSED` nhưng có check pending/failure → ở Test, action là chờ checks pass.
 
@@ -672,6 +675,7 @@ Các điểm dưới đây là **hành vi code hiện tại**, không nên mặc
 - Trước đây closing note của Claude bị xếp nhầm vào Ready to Merge vì trùng heading; panel Completed không bao giờ hiện Summary. Nay thời điểm viết so với `closed_at` quyết định.
 - Trước đây verdict submit qua GitHub review UI không được đọc vì chỉ conversation comments được fetch. Nay reviews đã submit cũng được đọc.
 - Trước đây merge và close phải làm trên GitHub. Nay app có endpoint cho cả hai, và PR đã merged không còn làm stage tụt về Fix.
+- Trước đây một command vô hiệu result của mọi stage có keyword xuất hiện trong body. Prompt Review app gửi chứa "test coverage", nên re-review xoá luôn `TEST PASSED` đã ghi. Nay mỗi command chỉ thuộc một stage và chỉ vô hiệu result của stage đó (Issue #26).
 
 ## 16. Nhánh còn thiếu regression test riêng
 
@@ -689,6 +693,7 @@ Theo test suite hiện tại, các nhánh sau chưa có test riêng hoặc chưa
 
 ## References
 
+- `docs/issue-lifecycle-runbook.md` — cùng flow này nhìn từ phía operator: bấm gì, theo thứ tự nào.
 - `README.md:1-53`
 - `src/claude_schedule/lifecycle/engine.py`
 - `src/claude_schedule/lifecycle/models.py`
