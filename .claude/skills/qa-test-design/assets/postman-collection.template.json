@@ -1,0 +1,85 @@
+{
+  "info": {
+    "_postman_id": "replace-with-generated-id",
+    "name": "[Project] API Test Collection",
+    "description": "Skeleton collection. Replace sample requests and assertions.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.environment.get('access_token')) {",
+          "  // Collection bearer auth reads access_token automatically.",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": []
+    },
+    {
+      "name": "Happy Path",
+      "item": [
+        {
+          "name": "Sample health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Edge Cases",
+      "item": []
+    },
+    {
+      "name": "Error Cases",
+      "item": []
+    }
+  ]
+}
