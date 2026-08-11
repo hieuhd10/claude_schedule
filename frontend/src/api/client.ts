@@ -7,6 +7,8 @@ import {
   type FixBranchesResponse,
   type Comment,
   type ConfigResponse,
+  type MultiRepoConfigResponse,
+  type ValidateRepoTokenResponse,
   type CreateIssueRequest,
   type CreateIssueResponse,
   type IssueDetailResponse,
@@ -96,6 +98,17 @@ export function postPullRequestComment(
 
 export function getConfig(): Promise<ConfigResponse> {
   return request<ConfigResponse>("/api/config");
+}
+
+export function getMultiRepoConfig(): Promise<MultiRepoConfigResponse> {
+  return request<MultiRepoConfigResponse>("/api/config/multi-repo");
+}
+
+export function validateRepoToken(token: string): Promise<ValidateRepoTokenResponse> {
+  return request<ValidateRepoTokenResponse>("/api/config/repo-tokens/validate", {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
 }
 
 export function createIssue(

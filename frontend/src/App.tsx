@@ -6,6 +6,7 @@ import { Card } from "./design-system/lift-tailux";
 import { IssueCreateForm } from "./components/issue-create-form";
 import { IssueUrlForm } from "./components/issue-url-form";
 import { StatusBanner } from "./components/status-banner";
+import { RepoCredentialManager } from "./components/repo-credential-manager";
 import { IssueDetailPage } from "./pages/issue-detail-page";
 
 interface Target {
@@ -42,12 +43,15 @@ function App() {
 
   return (
     <div className="app">
-      <header className="app__header">
-        <div className="app__brand-mark" aria-hidden="true">CS</div>
-        <div>
-          <h1 className="app__title t-page-title">Issue completion workspace</h1>
-          <p className="t-body">Track every step from bug report to verified resolution, with human or Claude-assisted comments.</p>
+      <header className="app__header flex justify-between items-start">
+        <div className="flex gap-4 items-start">
+          <div className="app__brand-mark" aria-hidden="true">CS</div>
+          <div>
+            <h1 className="app__title t-page-title">Issue completion workspace</h1>
+            <p className="t-body">Track every step from bug report to verified resolution, with human or Claude-assisted comments.</p>
+          </div>
         </div>
+        <RepoCredentialManager />
       </header>
 
       <nav className="app__mode-tabs" aria-label="Issue setup">
