@@ -61,8 +61,7 @@ jobs:
             When finished, post one concise top-level PR comment using `gh pr comment`.
             Include 'REVIEW PASSED' on its own line if acceptable, or 'REVIEW FAILED' on its own line if critical/important issues are found.
           claude_args: |
-            --max-budget-usd 1.00
+            --max-budget-usd 4.00
             --allowedTools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
-
