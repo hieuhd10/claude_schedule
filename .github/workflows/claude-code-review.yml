@@ -75,6 +75,14 @@ jobs:
 
             POSTING RESULT:
             When finished, post one concise top-level PR comment using `gh pr comment`.
+            Structure the comment with these exact markdown headers so it parses into QA Reports:
+
+            ## Summary
+            [1-2 sentences summarizing the PR review]
+
+            ## Findings
+            - [List key findings with bullet points]
+
             Include 'REVIEW PASSED' on its own line if acceptable, or 'REVIEW FAILED' on its own line if critical contract breaks or severe bugs exist.
           claude_args: |
             --max-budget-usd 4.00
