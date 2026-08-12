@@ -21,7 +21,7 @@ export function IssueUrlForm({ onSubmit, submitting }: IssueUrlFormProps) {
       <input
         className="form-input-base form-input"
         type="url"
-        placeholder="https://github.com/owner/repo/issues/123"
+        placeholder="https://github.com/owner/repo/issues/123 or /pull/456"
         value={url}
         onChange={(event) => setUrl(event.target.value)}
         required

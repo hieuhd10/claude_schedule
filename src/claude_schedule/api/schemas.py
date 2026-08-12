@@ -62,6 +62,27 @@ class ConfigResponse(BaseModel):
     repository: str
 
 
+class RepoTokenMapping(BaseModel):
+    repository_full_name: str
+    has_custom_token: bool
+
+
+class MultiRepoConfigResponse(BaseModel):
+    default_owner: str
+    default_repository: str
+    restrict_to_configured_repository: bool
+    configured_repositories: list[RepoTokenMapping]
+
+
+class ValidateRepoTokenRequest(BaseModel):
+    token: str = Field(min_length=1)
+
+
+class ValidateRepoTokenResponse(BaseModel):
+    valid: bool
+    message: str
+
+
 class CreateIssueRequest(BaseModel):
     title: str = Field(min_length=1, max_length=256)
     environment: str | None = None

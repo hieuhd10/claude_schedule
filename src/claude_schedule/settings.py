@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
     github_api_timeout_seconds: float = 15.0
     restrict_to_configured_repository: bool = True
+    repo_token_map_json: str = "{}"
 
     @property
     def cors_origin_list(self) -> list[str]:
@@ -30,6 +31,19 @@ class Settings(BaseSettings):
             owner.casefold() == self.github_owner.casefold()
             and repository.casefold() == self.github_repository.casefold()
         )
+
+    def get_token_for_repository(self, owner: str, repository: str) -> str:
+        import json
+
+        repo_key = f"{owner}/{repository}".casefold()
+        try:
+            mapping: dict[str, str] = json.loads(self.repo_token_map_json or "{}")
+            lowered_mapping = {k.casefold(): v for k, v in mapping.items()}
+            if repo_key in lowered_mapping:
+                return lowered_mapping[repo_key]
+        except (json.JSONDecodeError, TypeError, AttributeError):
+            return self.github_token
+        return self.github_token
 
 
 @lru_cache

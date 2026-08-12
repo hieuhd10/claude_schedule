@@ -104,15 +104,24 @@ def parse_claude_response(body: str, html_url: str | None = None) -> ParsedClaud
     )
 
 
+_CLEAN_MD_RE = re.compile(r"^\s*(?:#{1,6}\s*|\*{1,2}|`{1,3}|>\s*)")
+
+
 def _summarize(body: str) -> str:
     first_line = next((line.strip() for line in body.splitlines() if line.strip()), "")
-    if len(first_line) <= _SUMMARY_LIMIT:
-        return first_line
-    return first_line[: _SUMMARY_LIMIT - 1].rstrip() + "…"
+    clean_line = _CLEAN_MD_RE.sub("", first_line).strip()
+    clean_line = clean_line.replace("**", "").replace("`", "").strip()
+    if len(clean_line) <= _SUMMARY_LIMIT:
+        return clean_line
+    return clean_line[: _SUMMARY_LIMIT - 1].rstrip() + "…"
+
+
+def _is_bot_author(author: str, claude_bot_login: str) -> bool:
+    return author.casefold() == claude_bot_login.casefold() or author.endswith("[bot]")
 
 
 def _comment_category(comment: Comment, claude_bot_login: str) -> ActivityCategory:
-    if comment.author == claude_bot_login:
+    if _is_bot_author(comment.author, claude_bot_login):
         return ActivityCategory.CLAUDE_RESPONSE
     return ActivityCategory.HUMAN_COMMAND
 

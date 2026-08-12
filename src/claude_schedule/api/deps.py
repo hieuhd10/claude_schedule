@@ -18,6 +18,14 @@ def get_github_service(settings: Settings = Depends(get_settings)) -> GitHubServ
     return GitHubService(client)
 
 
+def get_github_service_for_repo(
+    owner: str, repository: str, settings: Settings = Depends(get_settings)
+) -> GitHubService:
+    token = settings.get_token_for_repository(owner, repository)
+    client = _get_client(token, settings.github_api_timeout_seconds)
+    return GitHubService(client)
+
+
 def ensure_repository_allowed(owner: str, repository: str, settings: Settings) -> None:
     if not settings.repository_is_allowed(owner, repository):
         raise RepositoryNotAllowedError(

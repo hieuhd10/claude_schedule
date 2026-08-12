@@ -5,11 +5,11 @@ from fastapi import APIRouter, Depends
 from claude_schedule.api.deps import ensure_repository_allowed, get_github_service
 from claude_schedule.api.issue_template import build_bug_report_body, build_labels_from_metadata
 from claude_schedule.api.schemas import (
+    LABEL_PREFIXES,
     CheckpointRequest,
     CloseIssueResponse,
     CommentResponse,
     ConfigResponse,
-    LABEL_PREFIXES,
     CreateIssueRequest,
     CreateIssueResponse,
     CreatePullRequestRequest,
@@ -18,9 +18,13 @@ from claude_schedule.api.schemas import (
     IssueDetailResponse,
     MergePullRequestRequest,
     MergePullRequestResponse,
+    MultiRepoConfigResponse,
     ParseUrlRequest,
     ParseUrlResponse,
     PostCommentRequest,
+    RepoTokenMapping,
+    ValidateRepoTokenRequest,
+    ValidateRepoTokenResponse,
 )
 from claude_schedule.github.models import CheckRun, Comment, Commit
 from claude_schedule.github.service import GitHubService
@@ -58,6 +62,47 @@ async def parse_url(payload: ParseUrlRequest) -> ParseUrlResponse:
 @router.get("/config", response_model=ConfigResponse)
 async def get_config(settings: Settings = Depends(get_settings)) -> ConfigResponse:
     return ConfigResponse(owner=settings.github_owner, repository=settings.github_repository)
+
+
+@router.get("/config/multi-repo", response_model=MultiRepoConfigResponse)
+async def get_multi_repo_config(
+    settings: Settings = Depends(get_settings),
+) -> MultiRepoConfigResponse:
+    import json
+
+    configured: list[RepoTokenMapping] = []
+    try:
+        mapping: dict[str, str] = json.loads(settings.repo_token_map_json or "{}")
+        for repo_key, token_val in mapping.items():
+            configured.append(
+                RepoTokenMapping(
+                    repository_full_name=repo_key,
+                    has_custom_token=bool(token_val),
+                )
+            )
+    except (json.JSONDecodeError, TypeError, AttributeError):
+        pass
+
+    return MultiRepoConfigResponse(
+        default_owner=settings.github_owner,
+        default_repository=settings.github_repository,
+        restrict_to_configured_repository=settings.restrict_to_configured_repository,
+        configured_repositories=configured,
+    )
+
+
+@router.post("/config/repo-tokens/validate", response_model=ValidateRepoTokenResponse)
+async def validate_repo_token(payload: ValidateRepoTokenRequest) -> ValidateRepoTokenResponse:
+    token = payload.token.strip()
+    if not token.startswith(("ghp_", "github_pat_", "gho_")):
+        return ValidateRepoTokenResponse(
+            valid=False,
+            message="Token format should begin with ghp_, github_pat_, or gho_",
+        )
+    return ValidateRepoTokenResponse(
+        valid=True,
+        message="Token format is valid and recognized as a GitHub Personal Access Token",
+    )
 
 
 @router.post("/issues/{owner}/{repository}", response_model=CreateIssueResponse)

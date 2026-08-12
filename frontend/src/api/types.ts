@@ -177,6 +177,23 @@ export interface ConfigResponse {
   repository: string;
 }
 
+export interface RepoTokenMapping {
+  repository_full_name: string;
+  has_custom_token: boolean;
+}
+
+export interface MultiRepoConfigResponse {
+  default_owner: string;
+  default_repository: string;
+  restrict_to_configured_repository: boolean;
+  configured_repositories: RepoTokenMapping[];
+}
+
+export interface ValidateRepoTokenResponse {
+  valid: boolean;
+  message: string;
+}
+
 export interface CreateIssueRequest {
   title: string;
   environment: string | null;

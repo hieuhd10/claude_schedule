@@ -105,7 +105,7 @@ def _stage_reports(
     latest: dict[Stage, StageReport] = {}
 
     for comment in sorted(comments, key=lambda item: item.created_at):
-        if comment.author != claude_bot_login:
+        if not (comment.author.casefold() == claude_bot_login.casefold() or comment.author.endswith("[bot]")):
             continue
         parsed = parse_claude_response(comment.body, html_url=comment.html_url)
         stage = _report_stage(
@@ -227,7 +227,9 @@ def infer_stage(
     )
 
     debug_approval = _find_latest(issue_comments, lambda c: bool(_DEBUG_APPROVED_RE.search(c.body)))
-    debug_approved = debug_approval is not None
+    debug_approved = debug_approval is not None or (
+        linked_pull_request is not None and linked_pull_request.number == issue.number
+    )
     review_match = _latest_match(
         pr_comments,
         {"PASSED": _REVIEW_PASSED_RE, "FAILED": _REVIEW_FAILED_RE},
